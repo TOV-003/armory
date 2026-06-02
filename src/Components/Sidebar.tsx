@@ -3,7 +3,6 @@ import { useMediaQuery } from "react-responsive";
 import Equipment from "../assets/Equipment.svg";
 import Home from "../assets/Home.svg";
 import Mission from "../assets/Mission.svg";
-import Repair from "../assets/Repair.svg";
 import Settings from "../assets/Settings.svg";
 import type { ViewType } from "../pages/Dashboard";
 
@@ -47,10 +46,6 @@ function Sidebar({ activeView, setActiveView }: SidebarProps) {
             <button className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg text-white ${activeView === "equipment" ? "bg-alternate" : "hover:bg-alternate"}`} onClick={() => handleNavigation("equipment")}>
               <img src={Equipment} alt="Logo" />
               <h2 className="font-extralight">Equipment</h2>
-            </button>
-            <button className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg text-white ${activeView === "damaged" ? "bg-alternate" : "hover:bg-alternate"}`} onClick={() => handleNavigation("damaged")}>
-              <img src={Repair} alt="Logo" />
-              <h2 className="font-extralight">Damaged</h2>
             </button>
             <button className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg text-white ${activeView === "settings" ? "bg-alternate" : "hover:bg-alternate"}`} onClick={() => handleNavigation("settings")}>
               <img src={Settings} alt="Logo" />
@@ -99,13 +94,6 @@ function Sidebar({ activeView, setActiveView }: SidebarProps) {
           <h2 className="font-extralight">Equipment</h2>
         </button>
 
-        <button
-          className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg text-white ${activeView === "damaged" ? "bg-alternate" : "hover:bg-alternate"}`}
-          onClick={() => setActiveView("damaged")}
-        >
-          <img src={Repair} alt="Logo" />
-          <h2 className="font-extralight">Damaged</h2>
-        </button>
 
         <button
           className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg text-white ${activeView === "settings" ? "bg-alternate" : "hover:bg-alternate"}`}

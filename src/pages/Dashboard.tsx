@@ -3,14 +3,13 @@ import { useEffect, useState } from "react"
 import Splash from "../Components/Splash"
 import Mission from "../Components/Mission"
 import Equipment from "../Components/Equipment"
-import Damaged from "../Components/Damaged"
 import Settings from "../Components/Settings"
 import Account from "../Components/Account"
 
 
 
 
-export type ViewType = "home" | "mission" | "equipment" | "damaged" | "settings" | "account";
+export type ViewType = "home" | "mission" | "equipment" | "settings" | "account";
 
 
 function Dashboard() {
@@ -30,7 +29,6 @@ function Dashboard() {
             home: <Splash />,
             mission: <Mission />,
             equipment: <Equipment />,
-            damaged: <Damaged />,
             settings: <Settings />,
             account: <Account />,
           }[activeView] || <Splash />
