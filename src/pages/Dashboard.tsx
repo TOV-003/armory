@@ -4,12 +4,11 @@ import Splash from "../Components/Splash"
 import Mission from "../Components/Mission"
 import Equipment from "../Components/Equipment"
 import Settings from "../Components/Settings"
-import Account from "../Components/Account"
 
 
 
 
-export type ViewType = "home" | "mission" | "equipment" | "settings" | "account";
+export type ViewType = "home" | "mission" | "equipment" | "settings";
 
 
 function Dashboard() {
@@ -30,7 +29,6 @@ function Dashboard() {
             mission: <Mission />,
             equipment: <Equipment />,
             settings: <Settings />,
-            account: <Account />,
           }[activeView] || <Splash />
         }
       </div>

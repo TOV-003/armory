@@ -52,7 +52,7 @@ function Sidebar({ activeView, setActiveView }: SidebarProps) {
               <h2 className="font-extralight">Settings</h2>
             </button>
           </div>
-          <button className={`flex mt-auto gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg text-white ${activeView === "account" ? "bg-alternate" : "hover:bg-alternate"}`} onClick={() => handleNavigation("account")}>
+          <button className={`flex mt-auto gap-2 items-center px-7 py-5 w-full  rounded-lg text-white `}>
             <img src={Equipment} alt="Logo" />
             <h2 className="font-extralight">Account</h2>
           </button>
@@ -105,8 +105,7 @@ function Sidebar({ activeView, setActiveView }: SidebarProps) {
       </div>
 
       <button
-        className={`flex mt-auto gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg text-white ${activeView === "account" ? "bg-alternate" : "hover:bg-alternate"}`}
-        onClick={() => setActiveView("account")}
+        className={`flex mt-auto gap-2 items-center px-7 py-5 w-full rounded-lg text-white `}
       >
         <img src={Equipment} alt="Logo" />
         <h2 className="font-extralight">Account</h2>
