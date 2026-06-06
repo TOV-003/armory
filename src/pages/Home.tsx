@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom"
-import Equipment from "../assets/Equipment.svg"; 
+import Equipment from "../assets/Equipment.svg";
 
 function Home() {
   const navigate = useNavigate();
   const handleClick = () => {
-    navigate('/dashboard')
+    navigate('/signup')
   }
 
   const handleSignIn = () => {
@@ -13,7 +13,7 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-primary text-white flex flex-col items-center p-4 sm:p-8 md:p-12">
-      <header className="w-full max-w-6xl flex justify-between items-center mb-16 px-4">
+      <header className="w-full max-w-6xl flex flex-col gap-4 md:flex-row justify-between items-center mb-16 px-4">
         <div className="flex items-center gap-3">
           <img src={Equipment} alt="Armory Logo" className="w-8 h-8" />
           <span className="text-xl font-bold tracking-wider">ARMORY</span>
@@ -34,7 +34,7 @@ function Home() {
           Manage Your Arsenal with <span className="text-blue-400">Armory</span>
         </h1>
         <p className="text-lg sm:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-          Streamline your equipment and mission management with our intuitive and powerful platform.
+          Streamline your equipment and mission management with this intuitive and powerful platform.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <button

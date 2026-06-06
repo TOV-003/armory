@@ -5,6 +5,7 @@ import Home from "../assets/Home.svg";
 import Mission from "../assets/Mission.svg";
 import Settings from "../assets/Settings.svg";
 import type { ViewType } from "../pages/Dashboard";
+import { Link } from "react-router-dom";
 
 interface SidebarProps {
   activeView: ViewType;
@@ -24,10 +25,10 @@ function Sidebar({ activeView, setActiveView }: SidebarProps) {
     return (
       <>
         <div className="fixed top-0 left-0 right-0 h-16 bg-primary border-b border-cardbg flex items-center justify-between px-4 text-white z-50">
-          <div className="flex gap-2 items-center">
+          <Link to="/" className="flex gap-2 items-center">
             <img src={Equipment} alt="Logo" className="w-8" />
             <h1 className="font-normal">ARMORY</h1>
-          </div>
+          </Link>
           <button onClick={() => setIsOpen(!isOpen)} className="p-2 cursor-pointer text-xl">
             {isOpen ? "✕" : "☰"}
           </button>
@@ -64,10 +65,10 @@ function Sidebar({ activeView, setActiveView }: SidebarProps) {
 
   return (
     <div className="w-60 flex flex-col items-start justify-start text-white gap-16 min-h-full">
-      <div className="flex gap-2 items-center ">
+      <Link to="/" className="flex gap-2 items-center">
         <img src={Equipment} alt="Logo" className="w-8" />
         <h1 className="font-normal">ARMORY</h1>
-      </div>
+      </Link>
 
       <div className="w-full flex flex-col items-start gap-1">
         <button
