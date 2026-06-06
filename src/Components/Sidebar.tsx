@@ -6,6 +6,7 @@ import Mission from "../assets/Mission.svg";
 import Settings from "../assets/Settings.svg";
 import type { ViewType } from "../pages/Dashboard";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 
 interface SidebarProps {
   activeView: ViewType;
@@ -15,6 +16,7 @@ interface SidebarProps {
 function Sidebar({ activeView, setActiveView }: SidebarProps) {
   const isMobile = useMediaQuery({ query: "(max-width: 639px)" });
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const { user } = useAuth();
 
   const handleNavigation = (view: ViewType) => {
     setActiveView(view);
@@ -55,7 +57,7 @@ function Sidebar({ activeView, setActiveView }: SidebarProps) {
           </div>
           <button className={`flex mt-auto gap-2 items-center px-7 py-5 w-full  rounded-lg text-white `}>
             <img src={Equipment} alt="Logo" />
-            <h2 className="font-extralight">Account</h2>
+            <h2 className="font-extralight">{user?.user_metadata.name || "Account"}</h2>
           </button>
         </div>
         {isOpen && <div className="fixed inset-0 bg-black/50 z-30" onClick={() => setIsOpen(false)} />}
@@ -109,7 +111,7 @@ function Sidebar({ activeView, setActiveView }: SidebarProps) {
         className={`flex mt-auto gap-2 items-center px-7 py-5 w-full rounded-lg text-white `}
       >
         <img src={Equipment} alt="Logo" />
-        <h2 className="font-extralight">Account</h2>
+        <h2 className="font-extralight">{user?.user_metadata.name || "Account"}</h2>
       </button>
     </div>
   );

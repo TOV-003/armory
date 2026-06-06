@@ -13,6 +13,7 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
                 setUser(session.user);
+                console.log("User session found:", session);
             }
             setLoading(false);
         }
@@ -41,8 +42,8 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
     }
 
     async function signup(email: string, password: string, name: string, phone: string) {
-        const { data, error } = await supabase.auth.signUp({ 
-            email, 
+        const { data, error } = await supabase.auth.signUp({
+            email,
             password,
             options: {
                 data: {

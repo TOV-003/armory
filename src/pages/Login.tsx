@@ -1,12 +1,37 @@
 import { useNavigate } from "react-router-dom";
 import Equipment from "../assets/Equipment.svg";
+import toast from "react-hot-toast";
+import { useAuth } from "../context/useAuth";
+import { useState, useEffect } from "react";
 export default function Login() {
     const navigate = useNavigate();
+    const { login, user } = useAuth();
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
-    const handleSignIn = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const [formData, setFormData] = useState({
+        email: "",
+        password: "",
+    });
+
+    async function handleSignIn(e: React.MouseEvent<HTMLButtonElement>) {
         e.preventDefault();
-        navigate('/dashboard');
+        setIsProcessing(true);
+        try {
+            await login(formData.email, formData.password);
+            toast.success("Successfully signed in!");
+            setTimeout(() => { setIsProcessing(false); navigate('/dashboard'); }, 500);
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to sign in.");
+        }
     };
+
+    useEffect(() => {
+        if (user) {
+            toast.success("Already signed in! Redirecting to dashboard...");
+            setTimeout(() => navigate('/dashboard'), 500);
+        }
+    }, [user, navigate]);
 
     const handleSignUpRedirect = () => {
         navigate('/signup');
@@ -37,6 +62,8 @@ export default function Login() {
                                 type="email"
                                 placeholder="Email Address"
                                 className="w-full p-3 rounded-md text-primary bg-secondary border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value={formData.email}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                             />
                         </div>
                         <div>
@@ -44,6 +71,8 @@ export default function Login() {
                                 type="password"
                                 placeholder="Password"
                                 className="w-full p-3 rounded-md text-primary bg-secondary border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value={formData.password}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                             />
                         </div>
                         <button
@@ -51,7 +80,7 @@ export default function Login() {
                             className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-md text-lg transition duration-300 ease-in-out transform hover:scale-105"
                             onClick={handleSignIn}
                         >
-                            Sign In
+                            {isProcessing ? "Signing in..." : "Sign In"}
                         </button>
                     </form>
                     <p className="mt-4 text-sm">
