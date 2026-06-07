@@ -13,7 +13,6 @@ export type ViewType = "home" | "mission" | "equipment" | "settings";
 
 function Dashboard() {
   const [activeView, setActiveView] = useState<ViewType>("home");
-
   useEffect(() => {
     console.log(activeView)
   }, [activeView])

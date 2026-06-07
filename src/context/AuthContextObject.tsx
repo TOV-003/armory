@@ -18,5 +18,8 @@ interface AuthContextType {
     createWorkspace: (name: string, description: string) => Promise<boolean>;
     getWorkspaces: () => Promise<Workspace[]>;
     deleteWorkspace: (workspaceId: string) => Promise<boolean>;
+    setLoading: (loading: boolean) => void;
+    workspace: string;
+    setWorkspace: (workspace: string) => void;
 }
 export const AuthContext = createContext<AuthContextType | null>(null);

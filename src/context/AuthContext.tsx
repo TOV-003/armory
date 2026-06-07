@@ -13,6 +13,7 @@ interface Workspace {
 export default function AuthContextProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
+    const [workspace, setWorkspace] = useState<string>("");
 
 
     useEffect(() => {
@@ -20,7 +21,6 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
                 setUser(session.user);
-                console.log("User session found:", session);
             }
             setLoading(false);
         }
@@ -125,7 +125,7 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
 
     return (
         <AuthContext.Provider
-            value={{ user, loading, login, logout, signup, deleteMyAccount, createWorkspace, deleteWorkspace, getWorkspaces }}
+            value={{ user, loading, setLoading, login, logout, signup, deleteMyAccount, createWorkspace, deleteWorkspace, getWorkspaces, workspace, setWorkspace }}
         >
             {children}
         </AuthContext.Provider>
