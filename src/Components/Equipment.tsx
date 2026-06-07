@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { useAuth } from "../context/useAuth"
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { CATEGORIES } from "../assets/CATEGORIES";
 
 
 
@@ -14,6 +15,7 @@ function Equipment() {
     const [newEquipmentModal, setNewEquipmentModal] = useState<boolean>(false);
     const { user, workspace, createEquipment } = useAuth();
     const navigate = useNavigate();
+    const [categoryOpen, setCategoryOpen] = useState(false);
     const [EquipmentData, setEquipmentData] = useState({
         name: "",
         serial_number: "",
@@ -102,12 +104,46 @@ function Equipment() {
                                 </label>
                                 <label>
                                     New Equipment Category:
-                                    <input
-                                        placeholder="Equipment Category"
-                                        className="w-full p-3 rounded-md text-primary bg-secondary border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        value={EquipmentData.category}
-                                        onChange={(e) => setEquipmentData({ ...EquipmentData, category: e.target.value })}
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            placeholder="Type to search categories..."
+                                            className="w-full p-3 rounded-md text-primary bg-secondary border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={EquipmentData.category}
+                                            autoComplete="off"
+                                            onFocus={() => setCategoryOpen(true)}
+                                            onBlur={() => {
+                                                setCategoryOpen(false);
+                                                // clear if not a valid category
+                                                if (!CATEGORIES.includes(EquipmentData.category)) {
+                                                    setEquipmentData({ ...EquipmentData, category: "" });
+                                                }
+                                            }}
+                                            onChange={(e) => setEquipmentData({ ...EquipmentData, category: e.target.value })}
+                                        />
+                                        {categoryOpen && (
+                                            <div className="absolute z-50 w-full max-h-48 overflow-y-auto bg-secondary border border-gray-700 rounded-md mt-1 shadow-lg">
+                                                {CATEGORIES.filter(cat =>
+                                                    cat.toLowerCase().includes(EquipmentData.category.toLowerCase())
+                                                ).map(cat => (
+                                                    <div
+                                                        key={cat}
+                                                        className="px-3 py-2 cursor-pointer hover:bg-cardbg text-primary text-sm"
+                                                        onMouseDown={() => {
+                                                            setEquipmentData({ ...EquipmentData, category: cat });
+                                                            setCategoryOpen(false);
+                                                        }}
+                                                    >
+                                                        {cat}
+                                                    </div>
+                                                ))}
+                                                {CATEGORIES.filter(cat =>
+                                                    cat.toLowerCase().includes(EquipmentData.category.toLowerCase())
+                                                ).length === 0 && (
+                                                        <div className="px-3 py-2 text-sm text-gray-400 italic">No matches found</div>
+                                                    )}
+                                            </div>
+                                        )}
+                                    </div>
                                 </label>
                                 <button
                                     type="submit"

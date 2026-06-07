@@ -107,7 +107,7 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
             category,
             serial_number,
             user_id: user.id,
-            workspace_id: workspace
+            workspace_id: workspace.workspace_id
         });
         console.log("Equipment created:", name, category, serial_number, user.id, workspace);
         if (error) throw error;
