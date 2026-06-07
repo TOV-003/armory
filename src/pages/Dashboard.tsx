@@ -1,21 +1,59 @@
 import Sidebar from "../Components/Sidebar"
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
 import Splash from "../Components/Splash"
 import Mission from "../Components/Mission"
 import Equipment from "../Components/Equipment"
 import Settings from "../Components/Settings"
-
+import { useAuth } from "../context/useAuth";
 
 
 
 export type ViewType = "home" | "mission" | "equipment" | "settings";
+interface Workspace {
+  id: string;
+  name: string;
+  description: string;
+  user_id: string;
+}
 
 
 function Dashboard() {
   const [activeView, setActiveView] = useState<ViewType>("home");
+  const { setLoading, getWorkspaces, getLastActiveWorkspace, setWorkspace } = useAuth();
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+
+
   useEffect(() => {
     console.log(activeView)
-  }, [activeView])
+    console.log(workspaces);
+  }, [activeView, workspaces]);
+
+  useEffect(() => {
+    async function fetchWorkspaces() {
+      try {
+        setLoading(true);
+        const fetchedData = await getWorkspaces();
+        setWorkspaces(fetchedData || []);
+
+        if (fetchedData && fetchedData.length > 0) {
+          console.log(`${fetchedData.length} workspaces initialized in dashboard state.`);
+        }
+
+        const lastActiveWorkspace = await getLastActiveWorkspace();
+        if (lastActiveWorkspace) {
+          setWorkspace(lastActiveWorkspace);
+        }
+      }
+      catch (error) {
+        console.error("Error fetching workspaces:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchWorkspaces();
+  }, [getLastActiveWorkspace, getWorkspaces, setWorkspace, setLoading]);
+
 
 
   return (
@@ -27,7 +65,7 @@ function Dashboard() {
             home: <Splash />,
             mission: <Mission />,
             equipment: <Equipment />,
-            settings: <Settings />,
+            settings: <Settings workspaces={workspaces} setWorkspaces={setWorkspaces} />,
           }[activeView] || <Splash />
         }
       </div>

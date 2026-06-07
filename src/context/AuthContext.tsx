@@ -1,7 +1,7 @@
 import { AuthContext } from './AuthContextObject';
 import { supabase } from '../api/SupabaseClient';
 import type { User, AuthResponse } from '@supabase/supabase-js';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, useCallback, useMemo, type ReactNode } from 'react';
 
 interface Workspace {
     id: string;
@@ -15,120 +15,163 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
     const [loading, setLoading] = useState<boolean>(true);
     const [workspace, setWorkspace] = useState<string>("");
 
-
     useEffect(() => {
-        async function getInitialSession(): Promise<void> {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                setUser(session.user);
-            }
-            setLoading(false);
-        }
-
-        getInitialSession();
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(function (_, session) {
-            setUser(session?.user ?? null);
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+            setUser(prev => {
+                if (prev?.id === session?.user?.id) return prev;
+                return session?.user ?? null;
+            });
+            setLoading(prev => {
+                if (prev === false) return prev; // already false, skip re-render
+                return false;
+            });
         });
 
-        return function () {
-            subscription.unsubscribe();
-        };
-
+        return () => subscription.unsubscribe();
     }, []);
 
-    async function login(email: string, password: string) {
+
+    const login = useCallback(async (email: string, password: string) => {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-            throw error;
-        }
+        if (error) throw error;
         return data;
-    }
+    }, []);
 
-    async function logout() {
+    const logout = useCallback(async () => {
         await supabase.auth.signOut();
-    }
+    }, []);
 
-    async function signup(email: string, password: string, name: string, phone: string): Promise<AuthResponse['data']> {
+    const signup = useCallback(async (
+        email: string,
+        password: string,
+        name: string,
+        phone: string
+    ): Promise<AuthResponse['data']> => {
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
-            options: {
-                data: {
-                    name: name,
-                    phone: phone
-                }
-            }
+            options: { data: { name, phone } }
         });
-        if (error) {
-            throw error;
-        }
+        if (error) throw error;
         return data;
-    }
+    }, []);
 
-    async function deleteMyAccount(): Promise<boolean> {
+    const deleteMyAccount = useCallback(async (): Promise<boolean> => {
         const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error('No active user session found.');
 
-        if (!session) {
-            throw new Error('No active user session found.');
-        }
+        const { error } = await supabase.functions.invoke('delete-user', { method: 'POST' });
+        if (error) throw error;
 
-        try {
-            const { error } = await supabase.functions.invoke('delete-user', {
-                method: 'POST'
-            });
-
-            if (error) {
-                throw error;
-            }
-
-            await supabase.auth.signOut({ scope: 'local' });
-
-            return true;
-        } catch (err) {
-            console.error('Account deletion execution failed:', err);
-            throw err;
-        }
-    }
-
-    async function createWorkspace(name: string, description: string): Promise<boolean> {
-        const { error } = await supabase.from('workspaces')
-            .insert({
-                name: name,
-                description: description,
-                user_id: user?.id
-            });
-        if (error) {
-            throw error;
-        }
+        await supabase.auth.signOut({ scope: 'local' });
         return true;
-    }
+    }, []);
 
-    async function deleteWorkspace(workspaceId: string): Promise<boolean> {
-        const { error } = await supabase.from('workspaces')
-            .delete()
-            .eq('id', workspaceId);
-        if (error) {
-            throw error;
-        }
+    const createWorkspace = useCallback(async (name: string, description: string): Promise<boolean> => {
+        if (user === null) throw new Error('No authenticated user.');
+
+        const { error } = await supabase.from('workspaces').insert({
+            name,
+            description,
+            user_id: user.id
+        });
+        if (error) throw error;
         return true;
-    }
+    }, [user]);
 
-    async function getWorkspaces(): Promise<Workspace[]> {
+    const deleteWorkspace = useCallback(async (workspaceId: string): Promise<boolean> => {
+        const { error } = await supabase.from('workspaces').delete().eq('id', workspaceId);
+        if (error) throw error;
+        return true;
+    }, []);
+
+    const getWorkspaces = useCallback(async (): Promise<Workspace[]> => {
+        if (user === null) return [];
+
         const { data, error } = await supabase.from('workspaces')
             .select('*')
-            .eq('user_id', user?.id);
-        if (error) {
-            throw error;
-        }
+            .eq('user_id', user.id);
+        if (error) throw error;
         return data;
-    }
+    }, [user]);
+
+    const createEquipment = useCallback(async (
+        name: string,
+        category: string,
+        serial_number: string
+    ): Promise<boolean> => {
+        if (user === null) throw new Error('No authenticated user.');
+
+        const { error } = await supabase.from('equipment').insert({
+            name,
+            category,
+            serial_number,
+            user_id: user.id,
+            workspace_id: workspace
+        });
+        console.log("Equipment created:", name, category, serial_number, user.id, workspace);
+        if (error) throw error;
+        return true;
+    }, [user, workspace]);
+
+    const setLastActiveWorkspace = useCallback(async (workspaceId: string): Promise<boolean> => {
+        if (user === null) throw new Error('No authenticated user.');
+
+        const { error } = await supabase.from('last_workspace').upsert({
+            user_id: user.id,
+            workspace_id: workspaceId
+        }, { onConflict: 'user_id' });
+        if (error) throw error;
+        return true;
+    }, [user]);
+
+    const getLastActiveWorkspace = useCallback(async (): Promise<string | null> => {
+        if (user === null) return null;
+
+        const { data, error } = await supabase
+            .from('last_workspace')
+            .select('workspace_id')
+            .eq('user_id', user.id)
+            .maybeSingle();
+        if (error) throw error;
+        return data ? data.workspace_id : null;
+    }, [user]);
+
+    const value = useMemo(() => ({
+        user,
+        loading,
+        setLoading,
+        login,
+        logout,
+        signup,
+        deleteMyAccount,
+        createWorkspace,
+        deleteWorkspace,
+        getWorkspaces,
+        workspace,
+        setWorkspace,
+        createEquipment,
+        setLastActiveWorkspace,
+        getLastActiveWorkspace,
+    }), [
+        user,
+        loading,
+        login,
+        logout,
+        signup,
+        deleteMyAccount,
+        createWorkspace,
+        deleteWorkspace,
+        getWorkspaces,
+        workspace,
+        createEquipment,
+        setLastActiveWorkspace,
+        getLastActiveWorkspace,
+    ]);
 
     return (
-        <AuthContext.Provider
-            value={{ user, loading, setLoading, login, logout, signup, deleteMyAccount, createWorkspace, deleteWorkspace, getWorkspaces, workspace, setWorkspace }}
-        >
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
-    )
-
+    );
 }

@@ -21,5 +21,8 @@ interface AuthContextType {
     setLoading: (loading: boolean) => void;
     workspace: string;
     setWorkspace: (workspace: string) => void;
+    createEquipment: (name: string, category: string, serial_number: string) => Promise<boolean>;
+    setLastActiveWorkspace: (workspaceId: string) => Promise<boolean>;
+    getLastActiveWorkspace: () => Promise<string | null>;
 }
 export const AuthContext = createContext<AuthContextType | null>(null);
