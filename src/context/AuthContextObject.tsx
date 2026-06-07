@@ -18,11 +18,11 @@ interface AuthContextType {
     createWorkspace: (name: string, description: string) => Promise<boolean>;
     getWorkspaces: () => Promise<Workspace[]>;
     deleteWorkspace: (workspaceId: string) => Promise<boolean>;
-    setLoading: (loading: boolean) => void;
-    workspace: string;
-    setWorkspace: (workspace: string) => void;
+    setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+    workspace: { workspace_id: string; workspace_name: string };
+    setWorkspace: React.Dispatch<React.SetStateAction<{ workspace_id: string; workspace_name: string }>>;
     createEquipment: (name: string, category: string, serial_number: string) => Promise<boolean>;
-    setLastActiveWorkspace: (workspaceId: string) => Promise<boolean>;
-    getLastActiveWorkspace: () => Promise<string | null>;
+    setLastActiveWorkspace: (workspaceId: string, workspaceName: string) => Promise<boolean>;
+    getLastActiveWorkspace: () => Promise<{ workspace_id: string; workspace_name: string } | null>;
 }
 export const AuthContext = createContext<AuthContextType | null>(null);

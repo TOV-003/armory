@@ -13,7 +13,7 @@ interface Workspace {
 export default function AuthContextProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
-    const [workspace, setWorkspace] = useState<string>("");
+    const [workspace, setWorkspace] = useState<{ workspace_id: string, workspace_name: string }>({ workspace_id: "", workspace_name: "" });
 
     useEffect(() => {
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -22,7 +22,7 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
                 return session?.user ?? null;
             });
             setLoading(prev => {
-                if (prev === false) return prev; // already false, skip re-render
+                if (prev === false) return prev;
                 return false;
             });
         });
@@ -114,27 +114,28 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
         return true;
     }, [user, workspace]);
 
-    const setLastActiveWorkspace = useCallback(async (workspaceId: string): Promise<boolean> => {
+    const setLastActiveWorkspace = useCallback(async (workspaceId: string, workspaceName: string): Promise<boolean> => {
         if (user === null) throw new Error('No authenticated user.');
 
         const { error } = await supabase.from('last_workspace').upsert({
             user_id: user.id,
-            workspace_id: workspaceId
+            workspace_id: workspaceId,
+            workspace_name: workspaceName
         }, { onConflict: 'user_id' });
         if (error) throw error;
         return true;
     }, [user]);
 
-    const getLastActiveWorkspace = useCallback(async (): Promise<string | null> => {
+    const getLastActiveWorkspace = useCallback(async (): Promise<{ workspace_id: string; workspace_name: string } | null> => {
         if (user === null) return null;
 
         const { data, error } = await supabase
             .from('last_workspace')
-            .select('workspace_id')
+            .select('workspace_id, workspace_name')
             .eq('user_id', user.id)
             .maybeSingle();
         if (error) throw error;
-        return data ? data.workspace_id : null;
+        return data ?? null;
     }, [user]);
 
     const value = useMemo(() => ({

@@ -42,9 +42,9 @@ export default function Settings({ workspaces, setWorkspaces }: SettingsProps) {
         setDeleteWorkspaceModal(false);
     }
 
-    async function handleSelectWorkspace(workspaceId: string) {
-        setWorkspace(workspaceId);
-        await setLastActiveWorkspace(workspaceId);
+    async function handleSelectWorkspace(workspaceId: string, workspaceName: string) {
+        setWorkspace({ workspace_id: workspaceId, workspace_name: workspaceName });
+        await setLastActiveWorkspace(workspaceId, workspaceName);
         toast.success("Workspace selected!");
         console.log("Selected workspace:", workspaceId);
         setNewWorkspaceModal(false);
@@ -133,14 +133,14 @@ export default function Settings({ workspaces, setWorkspaces }: SettingsProps) {
                             >
                                 Delete Workspace
                             </button>
-                            {workspace === el.id ? (
+                            {workspace.workspace_id === el.id ? (
                                 <button className="bg-primary/70 self-center backdrop-blur-xl hover:bg-primary/80 px-4 py-2 text-white font-semibold rounded-xl transition duration-200 mt-2">
                                     Current Workspace
                                 </button>
                             ) : (
                                 <button
                                     className="bg-green-600/70 self-center backdrop-blur-xl hover:bg-green-600/80 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition duration-200 mt-2"
-                                    onClick={() => handleSelectWorkspace(el.id)}
+                                    onClick={() => handleSelectWorkspace(el.id, el.name)}
                                 >
                                     Select Workspace
                                 </button>
