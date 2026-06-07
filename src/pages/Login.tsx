@@ -12,6 +12,14 @@ export default function Login() {
         email: "",
         password: "",
     });
+    useEffect(() => {
+        setTimeout(() => {
+            if (user) {
+                toast.success("Already signed in! Redirecting to dashboard...");
+                navigate('/dashboard');
+            }
+        }, 500);
+    }, [user, navigate]);
 
     async function handleSignIn(e: React.MouseEvent<HTMLButtonElement>) {
         e.preventDefault();
@@ -19,19 +27,15 @@ export default function Login() {
         try {
             await login(formData.email, formData.password);
             toast.success("Successfully signed in!");
-            setTimeout(() => { setIsProcessing(false); navigate('/dashboard'); }, 500);
+            setIsProcessing(false);
+            navigate('/dashboard');;
         } catch (error) {
             console.error(error);
             toast.error("Failed to sign in.");
         }
     };
 
-    useEffect(() => {
-        if (user) {
-            toast.success("Already signed in! Redirecting to dashboard...");
-            setTimeout(() => navigate('/dashboard'), 500);
-        }
-    }, [user, navigate]);
+
 
     const handleSignUpRedirect = () => {
         navigate('/signup');

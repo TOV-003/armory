@@ -1,4 +1,25 @@
+import { useAuth } from "../context/useAuth";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+
 export default function Settings() {
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!user) {
+            window.location.href = '/login';
+        }
+    }, [user]);
+
+    async function handleLogout() {
+        console.log("User data before logout:", user);
+        toast.success("Logged out!");
+        await logout();
+        navigate('/');
+    };
+
     return (
         <div className="flex flex-col w-full bg-secondary md:h-full rounded-2xl p-2 gap-5 items-center justify-start">
             <div className="flex flex-col items-center  md:flex-row justify-between w-full gap-4 md:gap-0">
@@ -10,7 +31,7 @@ export default function Settings() {
             </div>
             <div className="flex flex-col items-center md:items-start justify-between w-full gap-4">
                 <h1 className="text-primary font-normal md:text-3xl md:text-start text-center text-xl ">Workspaces: </h1>
-                <div className="flex flex-col items-center md:grid md:grid-cols-2 lg:grid-cols-4 lg:grid lg:place-items-center justify-between w-full gap-2 font-inter">
+                <div className="flex flex-col items-center md:grid md:grid-cols-2 md:place-items-center md:w-fit md:self-center lg:grid-cols-4 lg:grid lg:place-items-center justify-between w-full gap-2 font-inter">
                     <div className="h-60 w-60  font-normal flex flex-col justify-evenly items-start p-4 rounded-xl bg-cardbg border-l-8 border-[#3E87DF] text-white">
                         <h4 className="text-2xl">Workspace 1</h4>
                         <h4 className="text-xl">Equipments:</h4>
@@ -75,7 +96,7 @@ export default function Settings() {
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" /><path d="M16 5l3 3" /></svg>
                     Edit Account
                 </button>
-                <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-secondary text-primary border border-border-secondary text-sm font-medium transition-all duration-150 hover:bg-tertiary hover:border-border-primary active:scale-[0.97] cursor-pointer">
+                <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-secondary text-primary border border-border-secondary text-sm font-medium transition-all duration-150 hover:bg-tertiary hover:border-border-primary active:scale-[0.97] cursor-pointer" onClick={handleLogout}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" /><path d="M9 12h12l-3 -3m0 6l3 -3" /></svg>
                     Logout
                 </button>
