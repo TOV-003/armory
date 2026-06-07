@@ -13,6 +13,7 @@ function Equipment() {
     const [isDamaged, setIsDamaged] = useState<boolean>(false);
     const [isDecommissioned, setIsDecomissioned] = useState<boolean>(false);
     const [newEquipmentModal, setNewEquipmentModal] = useState<boolean>(false);
+    const [creatingEquipment, setCreatingEquipment] = useState<boolean>(false);
     const { user, workspace, createEquipment } = useAuth();
     const navigate = useNavigate();
     const [categoryOpen, setCategoryOpen] = useState(false);
@@ -56,10 +57,12 @@ function Equipment() {
 
     async function handleCreateEquipment(e: React.SubmitEvent<HTMLFormElement>) {
         e.preventDefault();
+        setCreatingEquipment(true);
         console.log("New equipment data:", EquipmentData);
         await createEquipment(EquipmentData.name, EquipmentData.category, EquipmentData.serial_number);
         toast.success("Equipment created successfully!");
         setNewEquipmentModal(false);
+        setCreatingEquipment(false);
         setEquipmentData({ name: "", serial_number: "", category: "" });
     }
 
@@ -113,7 +116,6 @@ function Equipment() {
                                             onFocus={() => setCategoryOpen(true)}
                                             onBlur={() => {
                                                 setCategoryOpen(false);
-                                                // clear if not a valid category
                                                 if (!CATEGORIES.includes(EquipmentData.category)) {
                                                     setEquipmentData({ ...EquipmentData, category: "" });
                                                 }
@@ -149,17 +151,22 @@ function Equipment() {
                                     type="submit"
                                     className="bg-green-600/70 backdrop-blur-xl hover:bg-green-600/80 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition duration-200"
                                 >
-                                    Create Equipment
+                                    {
+                                        creatingEquipment ?
+                                            "Creating Equipment..."
+                                            :
+                                            "Create Equipment"
+                                    }
                                 </button>
                             </form>
                         </div>
                     )}
                 </div>
             </div>
-            <div className="flex items-center w-fit rounded-lg border border-alternate overflow-clip">
-                <button className={`p-2 cursor-pointer ${isAll ? "bg-alternate text-white" : "border-r border-alternate"} w-40`} onClick={setAll}>All Equipment</button>
-                <button className={`p-2 cursor-pointer ${isAvailable ? "bg-alternate text-white" : "border-r border-alternate"} w-40`} onClick={setAvailable}>Available</button>
-                <button className={`p-2 cursor-pointer ${isDamaged ? "bg-alternate text-white" : "border-r border-alternate"} w-40`} onClick={setDamaged}>Damaged</button>
+            <div className="flex flex-col md:flex-row items-center w-fit rounded-lg border border-alternate overflow-clip">
+                <button className={`p-2 cursor-pointer ${isAll ? "bg-alternate text-white" : "md:border-r border-alternate"} w-40`} onClick={setAll}>All Equipment</button>
+                <button className={`p-2 cursor-pointer ${isAvailable ? "bg-alternate text-white" : "md:border-r border-alternate"} w-40`} onClick={setAvailable}>Available</button>
+                <button className={`p-2 cursor-pointer ${isDamaged ? "bg-alternate text-white" : "md:border-r border-alternate"} w-40`} onClick={setDamaged}>Damaged</button>
                 <button className={`p-2 cursor-pointer ${isDecommissioned ? "bg-alternate text-white" : ""} w-40`} onClick={setDecomissioned}>Decommissioned</button>
             </div>
             <div className="col-span-5 bg-cardbg h-full rounded-xl p-5 w-full">g</div>
