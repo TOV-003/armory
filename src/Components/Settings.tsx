@@ -13,7 +13,7 @@ interface Workspace {
 
 
 export default function Settings() {
-    const { user, logout, loading, setLoading, getWorkspaces, createWorkspace, deleteWorkspace } = useAuth();
+    const { user, logout, loading, setLoading, getWorkspaces, createWorkspace, deleteWorkspace, workspace, setWorkspace } = useAuth();
     const navigate = useNavigate();
     const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
     const [newWorkspaceModal, setNewWorkspaceModal] = useState<boolean>(false);
@@ -35,6 +35,7 @@ export default function Settings() {
                 const workspaces = await getWorkspaces();
                 console.log("Fetched workspaces:", workspaces);
                 setWorkspaces(workspaces);
+                setWorkspace(workspaces.length > 0 ? workspaces[0].id : "");
                 return workspaces;
             }
             catch (error) {
@@ -43,7 +44,7 @@ export default function Settings() {
         }
         fetchWorkspaces();
         setLoading(false);
-    }, [user, setLoading, getWorkspaces, newWorkspaceModal, deleteWorkspaceModal]);
+    }, [user, setLoading, getWorkspaces, newWorkspaceModal, deleteWorkspaceModal, setWorkspace]);
 
     async function handleCreateWorkspace(e: React.SubmitEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -59,6 +60,11 @@ export default function Settings() {
         setDeleteWorkspaceModal(false);
     }
 
+    async function handleSelectWorkspace(workspaceId: string) {
+        setWorkspace(workspaceId);
+        setNewWorkspaceModal(false);
+        setDeleteWorkspaceModal(false);
+    }
 
     async function handleLogout() {
         toast.success("Logged out!");
@@ -185,9 +191,9 @@ export default function Settings() {
                 <h1 className="text-primary font-normal md:text-2xl md:text-start text-center text-xl ">Workspaces: </h1>
                 <div className="flex flex-col items-center md:grid md:grid-cols-2 md:place-items-center md:w-fit md:self-center lg:grid-cols-4 lg:grid lg:place-items-center justify-between w-full gap-2 font-inter">
                     {workspaces.length > 0 ?
-                        workspaces.map((workspace) => (
-                            <div key={workspace.id} className="min-h-60 w-60 font-k2d font-normal flex flex-col justify-evenly items-start p-4 rounded-xl bg-cardbg border-l-8 border-[#3E87DF] text-white">
-                                <h4 className="text-2xl">{workspace.name}</h4>
+                        workspaces.map((el) => (
+                            <div key={el.id} className="min-h-60 w-60 font-k2d font-normal flex flex-col justify-evenly items-start p-4 rounded-xl bg-cardbg border-l-8 border-[#3E87DF] text-white">
+                                <h4 className="text-2xl">{el.name}</h4>
                                 <h4 className="text-xl">Equipments:</h4>
                                 <div className="flex flex-row w-full justify-between">
                                     <p className="text-2xl font-bold">31</p>
@@ -196,21 +202,33 @@ export default function Settings() {
                                 <div className="flex flex-row w-full justify-between">
                                     <p className="text-2xl font-bold">12</p>
                                 </div>
-                                <p className="text-sm w-full h-full font-k2d">Description: {workspace.description}</p>
+                                <p className="text-sm w-full h-full font-k2d">Description: {el.description}</p>
                                 <button
                                     onClick={() => setDeleteWorkspaceModal(true)}
-                                    className="bg-red-600/70 backdrop-blur-xl hover:bg-red-600/80 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition duration-200 mt-2">
+                                    className="bg-red-600/70 self-center backdrop-blur-xl hover:bg-red-600/80 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition duration-200 mt-2">
                                     Delete Workspace
                                 </button>
+                                {workspace === el.id ?
+                                    <button
+                                        className="bg-primary/70 self-center backdrop-blur-xl hover:bg-primary/80 px-4 py-2 text-white font-semibold rounded-xl transition duration-200 mt-2">
+                                        Current Workspace
+                                    </button>
+                                    :
+                                    <button
+                                        className="bg-green-600/70 self-center backdrop-blur-xl hover:bg-green-600/80 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition duration-200 mt-2"
+                                        onClick={() => handleSelectWorkspace(el.id)}>
+                                        Select Workspace
+                                    </button>
+                                }
                                 {deleteWorkspaceModal && (
                                     <div
-                                        onClick={() => setNewWorkspaceModal(false)}
+                                        onClick={() => setDeleteWorkspaceModal(false)}
                                         className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
                                     >
-                                        <div className="flex flex-col gap-4 max-w-md w-full border border-white/70 bg-blue-200 p-6 rounded-lg">
+                                        <div className="flex flex-col text-primary text-center gap-4 max-w-md w-full border border-white/70 bg-blue-200 p-6 rounded-lg">
                                             <p>Are you sure you want to delete this workspace?</p>
                                             <button
-                                                onClick={() => handleDeleteWorkspace(workspace.id)}
+                                                onClick={() => handleDeleteWorkspace(el.id)}
                                                 className="bg-red-600/70 backdrop-blur-xl hover:bg-red-600/80 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition duration-200"
                                             >
                                                 Delete Workspace
