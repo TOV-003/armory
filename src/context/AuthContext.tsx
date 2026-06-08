@@ -10,6 +10,18 @@ interface Workspace {
     user_id: string;
 }
 
+interface Equipment {
+    id: string;
+    name: string;
+    category: string;
+    serial_number: string;
+    user_id: string;
+    workspace_id: string;
+    created_at: string;
+    updated_at: string;
+    state: string;
+}
+
 export default function AuthContextProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -95,24 +107,34 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
         return data;
     }, [user]);
 
-    const createEquipment = useCallback(async (
-        name: string,
-        category: string,
-        serial_number: string
-    ): Promise<boolean> => {
+    const createEquipment = useCallback(async (name: string, category: string, serial_number: string): Promise<Equipment> => {
         if (user === null) throw new Error('No authenticated user.');
 
-        const { error } = await supabase.from('equipment').insert({
-            name,
-            category,
-            serial_number,
-            user_id: user.id,
-            workspace_id: workspace.workspace_id
-        });
-        console.log("Equipment created:", name, category, serial_number, user.id, workspace);
+        const { data, error } = await supabase.from('equipment')
+            .insert({ name, category, serial_number, user_id: user.id, workspace_id: workspace.workspace_id })
+            .select()
+            .single();
+        if (error) throw error;
+        return data;
+    }, [user, workspace]);
+
+    const getEquipments = useCallback(async (): Promise<Equipment[]> => {
+        if (user === null) return [];
+
+        const { data, error } = await supabase.from('equipment')
+            .select('*')
+            .eq('user_id', user.id)
+        if (error) throw error;
+        return data;
+    }, [user]);
+
+    const updateEquipmentState = useCallback(async (equipmentId: string, newState: string): Promise<boolean> => {
+        const { error } = await supabase.from('equipment')
+            .update({ state: newState })
+            .eq('id', equipmentId);
         if (error) throw error;
         return true;
-    }, [user, workspace]);
+    }, []);
 
     const setLastActiveWorkspace = useCallback(async (workspaceId: string, workspaceName: string): Promise<boolean> => {
         if (user === null) throw new Error('No authenticated user.');
@@ -154,6 +176,8 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
         createEquipment,
         setLastActiveWorkspace,
         getLastActiveWorkspace,
+        getEquipments,
+        updateEquipmentState,
     }), [
         user,
         loading,
@@ -168,6 +192,8 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
         createEquipment,
         setLastActiveWorkspace,
         getLastActiveWorkspace,
+        getEquipments,
+        updateEquipmentState,
     ]);
 
     return (

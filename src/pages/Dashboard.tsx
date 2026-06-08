@@ -15,12 +15,24 @@ interface Workspace {
   description: string;
   user_id: string;
 }
+interface Equipments {
+  id: string;
+  name: string;
+  category: string;
+  serial_number: string;
+  user_id: string;
+  workspace_id: string;
+  created_at: string;
+  updated_at: string;
+  state: string;
+}
 
 
 function Dashboard() {
   const [activeView, setActiveView] = useState<ViewType>("home");
-  const { setLoading, getWorkspaces, getLastActiveWorkspace, setWorkspace } = useAuth();
+  const { setLoading, getWorkspaces, getLastActiveWorkspace, setWorkspace, getEquipments } = useAuth();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [equipments, setEquipments] = useState<Equipments[]>([]);
 
 
   useEffect(() => {
@@ -50,9 +62,22 @@ function Dashboard() {
         setLoading(false);
       }
     }
-
+    async function fetchEquipments() {
+      try {
+        setLoading(true);
+        const fetchedData = await getEquipments();
+        setEquipments(fetchedData || []);
+        console.log(`${fetchedData.length} equipments initialized in dashboard state.`);
+      }
+      catch (error) {
+        console.error("Error fetching equipments:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchEquipments();
     fetchWorkspaces();
-  }, [getLastActiveWorkspace, getWorkspaces, setWorkspace, setLoading]);
+  }, [getLastActiveWorkspace, getWorkspaces, setWorkspace, setLoading, getEquipments]);
 
 
 
@@ -64,7 +89,7 @@ function Dashboard() {
           {
             home: <Splash />,
             mission: <Mission />,
-            equipment: <Equipment />,
+            equipment: <Equipment equipments={equipments} setEquipments={setEquipments} />,
             settings: <Settings workspaces={workspaces} setWorkspaces={setWorkspaces} />,
           }[activeView] || <Splash />
         }

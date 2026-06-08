@@ -8,6 +8,18 @@ interface Workspace {
     user_id: string;
 }
 
+interface Equipment {
+    id: string;
+    name: string;
+    category: string;
+    serial_number: string;
+    user_id: string;
+    workspace_id: string;
+    created_at: string;
+    updated_at: string;
+    state: string;
+}
+
 interface AuthContextType {
     user: User | null;
     loading: boolean;
@@ -21,8 +33,10 @@ interface AuthContextType {
     setLoading: React.Dispatch<React.SetStateAction<boolean>>;
     workspace: { workspace_id: string; workspace_name: string };
     setWorkspace: React.Dispatch<React.SetStateAction<{ workspace_id: string; workspace_name: string }>>;
-    createEquipment: (name: string, category: string, serial_number: string) => Promise<boolean>;
+    createEquipment: (name: string, category: string, serial_number: string) => Promise<Equipment>;
+    getEquipments: () => Promise<Equipment[]>;
     setLastActiveWorkspace: (workspaceId: string, workspaceName: string) => Promise<boolean>;
     getLastActiveWorkspace: () => Promise<{ workspace_id: string; workspace_name: string } | null>;
+    updateEquipmentState: (equipmentId: string, newState: string) => Promise<boolean>;
 }
 export const AuthContext = createContext<AuthContextType | null>(null);

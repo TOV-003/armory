@@ -44,11 +44,15 @@ export default function Settings({ workspaces, setWorkspaces }: SettingsProps) {
 
     async function handleSelectWorkspace(workspaceId: string, workspaceName: string) {
         setWorkspace({ workspace_id: workspaceId, workspace_name: workspaceName });
-        await setLastActiveWorkspace(workspaceId, workspaceName);
         toast.success("Workspace selected!");
-        console.log("Selected workspace:", workspaceId);
-        setNewWorkspaceModal(false);
-        setDeleteWorkspaceModal(false);
+        try {
+            await setLastActiveWorkspace(workspaceId, workspaceName)
+        }
+        finally {
+            console.log("Selected workspace:", workspaceId);
+            setNewWorkspaceModal(false);
+            setDeleteWorkspaceModal(false);
+        }
     }
 
     async function handleLogout() {
