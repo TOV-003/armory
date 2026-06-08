@@ -101,6 +101,8 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
             console.error("Error adding equipment to mission:", error);
         }
         finally {
+            const refreshed = await getEquipmentLogs(user?.id || "");
+            setEquipmentLogs(refreshed || []);
             toast.success("Equipment added to mission successfully!");
             setAddEquipmentModal(false);
             setNote("");
@@ -174,7 +176,7 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
                     </div>
                     <p className="text-lg font-semibold col-span-2 text-center">Actions</p>
 
-                    {missions.map((el) => (
+                    {missions.filter(el => el.workspace_id === workspace.workspace_id).map((el) => (
                         <>
                             <p className="text-lg font-semibold w-full col-span-1 text-center">{el.name}</p>
                             <div className="flex flex-row gap-4 w-full col-span-3">
@@ -202,7 +204,7 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
                                             >
                                                 <p className="font-semibold text-sm text-gray-700">All Equipment</p>
                                                 <div className="flex flex-col gap-2">
-                                                    {equipments.filter(eq => eq.workspace_id === workspace.workspace_id).map((item) => (
+                                                    {equipments.filter(eq => eq.workspace_id === workspace.workspace_id).filter(item => item.state === "AVAILABLE").map((item) => (
                                                         <div
                                                             key={item.id}
                                                             className="flex items-center justify-between gap-4 w-full bg-white/50 border border-white/70 rounded-lg px-4 py-2"
