@@ -1,5 +1,5 @@
 import { useAuth } from "../context/useAuth";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -10,12 +10,25 @@ interface Workspace {
     user_id: string;
 }
 
+interface Equipment {
+    id: string;
+    name: string;
+    category: string;
+    serial_number: string;
+    user_id: string;
+    workspace_id: string;
+    created_at: string;
+    updated_at: string;
+    state: string;
+}
+
 interface SettingsProps {
     workspaces: Workspace[];
     setWorkspaces: React.Dispatch<React.SetStateAction<Workspace[]>>;
+    equipments: Equipment[];
 }
 
-export default function Settings({ workspaces, setWorkspaces }: SettingsProps) {
+export default function Settings({ workspaces, setWorkspaces, equipments }: SettingsProps) {
     const { user, logout, loading, workspace, setWorkspace, createWorkspace, deleteWorkspace, getWorkspaces, setLastActiveWorkspace } = useAuth();
     const navigate = useNavigate();
     const [newWorkspaceModal, setNewWorkspaceModal] = useState<boolean>(false);
@@ -24,6 +37,12 @@ export default function Settings({ workspaces, setWorkspaces }: SettingsProps) {
         name: "",
         description: "",
     });
+
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+        }
+    }, [user, navigate, workspace]);
 
     async function handleCreateWorkspace(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -124,7 +143,11 @@ export default function Settings({ workspaces, setWorkspaces }: SettingsProps) {
                             <h4 className="text-2xl">{el.name}</h4>
                             <h4 className="text-xl">Equipments:</h4>
                             <div className="flex flex-row w-full justify-between">
-                                <p className="text-2xl font-bold">31</p>
+                                <p className="text-2xl font-bold">
+                                    {(() => {
+                                        return equipments.filter(eq => eq.workspace_id === el.id).length;
+                                    })()}
+                                </p>
                             </div>
                             <h4 className="text-xl">Missions:</h4>
                             <div className="flex flex-row w-full justify-between">

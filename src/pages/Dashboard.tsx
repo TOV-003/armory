@@ -90,7 +90,7 @@ function Dashboard() {
             home: <Splash />,
             mission: <Mission />,
             equipment: <Equipment equipments={equipments} setEquipments={setEquipments} />,
-            settings: <Settings workspaces={workspaces} setWorkspaces={setWorkspaces} />,
+            settings: <Settings workspaces={workspaces} setWorkspaces={setWorkspaces} equipments={equipments} />,
           }[activeView] || <Splash />
         }
       </div>
