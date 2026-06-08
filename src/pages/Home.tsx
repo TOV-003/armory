@@ -36,6 +36,9 @@ function Home() {
         <p className="text-lg sm:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
           Streamline your equipment and mission management with this intuitive and powerful platform.
         </p>
+        <p className="text-lg sm:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+          We do not recommend using Armory on a smartphone or a computer with a narrow screen in portrait orientation. However the horizontal layout is optimized for mobile devices.
+        </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <button
             className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg text-xl transition duration-300 ease-in-out transform hover:scale-105 shadow-xl shadow-blue-500/20 w-full sm:w-auto"

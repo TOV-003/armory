@@ -14,7 +14,7 @@ interface SidebarProps {
 }
 
 function Sidebar({ activeView, setActiveView }: SidebarProps) {
-  const isMobile = useMediaQuery({ query: "(max-width: 639px)" });
+  const isMobile = useMediaQuery({ query: "(max-width: 768px)" });
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { user } = useAuth();
 

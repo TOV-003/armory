@@ -22,6 +22,27 @@ interface Equipment {
     state: string;
 }
 
+interface Missions {
+    id: string;
+    name: string;
+    serial_number: string;
+    user_id: string;
+    workspace_id: string;
+    start_date: Date;
+    status: string;
+}
+
+interface EquipmentLog {
+    id: string;
+    equipment_id: string;
+    action_type: string;
+    user_id: string;
+    workspace_id: string;
+    mission_id: string;
+    notes: string | null;
+    timestamp: Date;
+}
+
 export default function AuthContextProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -160,6 +181,52 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
         return data ?? null;
     }, [user]);
 
+    const getMissions = useCallback(async (): Promise<Missions[]> => {
+        if (user === null) return [];
+
+        const { data, error } = await supabase.from('missions')
+            .select('*')
+            .eq('user_id', user.id)
+        if (error) throw error;
+        return data;
+    }, [user]);
+
+    const createMission = useCallback(async (name: string, start_date: Date): Promise<Missions> => {
+        if (user === null) throw new Error('No authenticated user.');
+
+        const { data, error } = await supabase.from('missions')
+            .insert({ name, start_date: start_date.toISOString(), workspace_id: workspace.workspace_id, user_id: user.id })
+            .select()
+            .single();
+        if (error) throw error;
+        return data;
+    }, [user, workspace]);
+
+    const updateMissionStatus = useCallback(async (missionId: string, newStatus: string): Promise<boolean> => {
+        const { error } = await supabase.from('missions')
+            .update({ status: newStatus })
+            .eq('id', missionId);
+        if (error) throw error;
+        return true;
+    }, []);
+
+    const newEquipmentLog = useCallback(async (equipmentId: string, action_type: string, mission_id: string, notes: string | null, timestamp: Date): Promise<boolean> => {
+        const { error } = await supabase.from('equipment_log')
+            .insert({ equipment_id: equipmentId, action_type, user_id: user?.id, workspace_id: workspace.workspace_id, mission_id: mission_id, notes, timestamp: timestamp.toISOString() })
+            .select()
+            .single();
+        if (error) throw error;
+        return true;
+    }, [user, workspace]);
+
+    const getEquipmentLogs = useCallback(async (userId: string): Promise<EquipmentLog[]> => {
+        const { data, error } = await supabase.from('equipment_log')
+            .select('*')
+            .eq('user_id', userId);
+        if (error) throw error;
+        return data;
+    }, []);
+
     const value = useMemo(() => ({
         user,
         loading,
@@ -178,6 +245,11 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
         getLastActiveWorkspace,
         getEquipments,
         updateEquipmentState,
+        getMissions,
+        createMission,
+        newEquipmentLog,
+        updateMissionStatus,
+        getEquipmentLogs
     }), [
         user,
         loading,
@@ -194,6 +266,11 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
         getLastActiveWorkspace,
         getEquipments,
         updateEquipmentState,
+        getMissions,
+        createMission,
+        newEquipmentLog,
+        updateMissionStatus,
+        getEquipmentLogs
     ]);
 
     return (
