@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import Equipment from "../assets/Equipment.svg";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/useAuth";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 export default function Login() {
     const navigate = useNavigate();
     const { login, user } = useAuth();
@@ -12,29 +12,34 @@ export default function Login() {
         email: "",
         password: "",
     });
-    useEffect(() => {
-        setTimeout(() => {
-            if (user) {
-                toast.success("Already signed in! Redirecting to dashboard...");
-                navigate('/dashboard');
-            }
-        }, 500);
-    }, [user, navigate]);
+    const justLoggedIn = useRef(false);
 
     async function handleSignIn(e: React.MouseEvent<HTMLButtonElement>) {
         e.preventDefault();
         setIsProcessing(true);
         try {
+            justLoggedIn.current = true;
             await login(formData.email, formData.password);
             toast.success("Successfully signed in!");
             setIsProcessing(false);
-            navigate('/dashboard');;
+            navigate('/dashboard');
         } catch (error) {
+            justLoggedIn.current = false;
             console.error(error);
             toast.error("Failed to sign in.");
+            setIsProcessing(false);
         }
-    };
+    }
 
+    useEffect(() => {
+        if (!user) return;
+        if (justLoggedIn.current) return; // skip if we just logged in normally
+
+        setTimeout(() => {
+            toast.success("Already signed in! Redirecting to dashboard...");
+            navigate('/dashboard');
+        }, 500);
+    }, [user, navigate]);
 
 
     const handleSignUpRedirect = () => {
@@ -81,7 +86,7 @@ export default function Login() {
                         </div>
                         <button
                             type="submit"
-                            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-md text-lg transition duration-300 ease-in-out transform hover:scale-105"
+                            className="w-full cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-md text-lg transition duration-300 ease-in-out transform hover:scale-105"
                             onClick={handleSignIn}
                         >
                             {isProcessing ? "Signing in..." : "Sign In"}
