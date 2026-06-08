@@ -202,7 +202,7 @@ function Equipment({ equipments, setEquipments }: SettingsProps) {
                 <button className={`p-2 cursor-pointer ${isAvailable ? "bg-alternate text-white" : "md:border-r border-alternate"} w-40 md:w-fit`} onClick={setAvailable}>Available</button>
                 <button className={`p-2 cursor-pointer ${isInUse ? "bg-alternate text-white" : "md:border-r border-alternate"} w-40 md:w-fit`} onClick={setInUse}>In Use</button>
                 <button className={`p-2 cursor-pointer ${isDamaged ? "bg-alternate text-white" : "md:border-r border-alternate"} w-40 md:w-fit`} onClick={setDamaged}>Damaged</button>
-                <button className={`p-2 cursor-pointer ${isDecommissioned ? "bg-alternate text-white" : ""} w-40 md:w-fit`} onClick={setDecomissioned}>Decommissioned</button>
+                <button className={`p-2 cursor-pointer ${isDecommissioned ? "bg-alternate text-white" : ""} w-40 md:w-fit `} onClick={setDecomissioned}>Decommissioned</button>
             </div>
             <div className="col-span-5 bg-cardbg h-full rounded-xl md:p-5 w-full">
                 {(() => {
