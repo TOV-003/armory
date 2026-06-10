@@ -114,7 +114,7 @@ function Dashboard() {
   }, [workspaces, getMissions]);
 
   return (
-    <main className="flex gap-5 p-4 items-start h-screen overflow-auto flex-col md:flex-row">
+    <main className="flex gap-5 p-4 items-start h-screen overflow-auto flex-col md:flex-row bg-primary">
       <Sidebar activeView={activeView} setActiveView={setActiveView} />
       <div className="pt-16 md:pt-0 w-full h-full">
         {
@@ -122,7 +122,7 @@ function Dashboard() {
             home: <Splash />,
             mission: <Mission missions={missions} setMissions={setMissions} equipments={equipments} setEquipments={setEquipments} />,
             equipment: <Equipment equipments={equipments} setEquipments={setEquipments} />,
-            settings: <Settings workspaces={workspaces} setWorkspaces={setWorkspaces} equipments={equipments} />,
+            settings: <Settings workspaces={workspaces} setWorkspaces={setWorkspaces} equipments={equipments} missions={missions} />,
           }[activeView] || <Splash />
         }
       </div>

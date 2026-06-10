@@ -22,13 +22,24 @@ interface Equipment {
     state: string;
 }
 
+interface Missions {
+    id: string;
+    name: string;
+    serial_number: string;
+    user_id: string;
+    workspace_id: string;
+    start_date: Date;
+    status: string;
+}
+
 interface SettingsProps {
     workspaces: Workspace[];
     setWorkspaces: React.Dispatch<React.SetStateAction<Workspace[]>>;
     equipments: Equipment[];
+    missions: Missions[];
 }
 
-export default function Settings({ workspaces, setWorkspaces, equipments }: SettingsProps) {
+export default function Settings({ workspaces, setWorkspaces, equipments, missions }: SettingsProps) {
     const { user, logout, loading, workspace, setWorkspace, createWorkspace, deleteWorkspace, getWorkspaces, setLastActiveWorkspace } = useAuth();
     const navigate = useNavigate();
     const [newWorkspaceModal, setNewWorkspaceModal] = useState<boolean>(false);
@@ -122,12 +133,12 @@ export default function Settings({ workspaces, setWorkspaces, equipments }: Sett
     }
 
     return (
-        <div className="flex flex-col w-full bg-secondary md:h-full rounded-2xl p-2 gap-5 items-center justify-start">
+        <div className="flex flex-col w-full bg-linear-to-br from-white to-gray-50 md:h-full rounded-2xl p-6 gap-5 items-center justify-start shadow-lg">
             <div className="flex flex-col items-center md:flex-row justify-between w-full gap-4 md:gap-0">
-                <h1 className="text-primary font-normal md:text-2xl md:text-start text-center text-xl">Settings</h1>
+                <h1 className="text-gray-900 font-normal md:text-2xl md:text-start text-center text-xl">Settings</h1>
                 <div className="flex gap-4 items-center justify-center">
                     <button
-                        className="text-base px-6 py-2 rounded-lg bg-green-600 text-white font-k2d font-semibold cursor-pointer"
+                        className="text-base px-6 py-2 rounded-lg bg-secondary hover:bg-indigo-600 text-white font-k2d font-semibold cursor-pointer shadow-lg hover:shadow-xl transition-all"
                         onClick={() => setNewWorkspaceModal(true)}
                     >
                         Create New Workspace
@@ -136,12 +147,12 @@ export default function Settings({ workspaces, setWorkspaces, equipments }: Sett
             </div>
 
             <div className="flex flex-col items-center md:items-start justify-between w-full gap-4">
-                <h1 className="text-primary font-normal md:text-2xl md:text-start text-center text-xl">Workspaces:</h1>
-                <div className="flex flex-col items-center md:grid md:grid-cols-2 md:place-items-center md:w-fit md:self-center lg:grid-cols-4 lg:grid lg:place-items-center justify-between w-full gap-2 font-inter">
+                <h1 className="text-gray-900 font-normal md:text-2xl md:text-start text-center text-xl">Workspaces:</h1>
+                <div className="flex flex-col items-center md:grid md:grid-cols-2 md:place-items-center md:w-fit md:self-center lg:grid-cols-4 lg:grid lg:place-items-center justify-between w-full gap-4 font-inter">
                     {workspaces.length > 0 ? workspaces.map((el) => (
-                        <div key={el.id} className="min-h-60 w-60 font-k2d font-normal flex flex-col justify-evenly items-start p-4 rounded-xl bg-cardbg border-l-8 border-[#3E87DF] text-white">
-                            <h4 className="text-2xl">{el.name}</h4>
-                            <h4 className="text-xl">Equipments:</h4>
+                        <div key={el.id} className="h-full w-60 font-k2d font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border-l-8 border-secondary text-gray-900 shadow-lg hover:shadow-xl transition-shadow">
+                            <h4 className="text-xl">{el.name}</h4>
+                            <h4 className="text-lg">Equipments:</h4>
                             <div className="flex flex-row w-full justify-between">
                                 <p className="text-2xl font-bold">
                                     {(() => {
@@ -149,7 +160,7 @@ export default function Settings({ workspaces, setWorkspaces, equipments }: Sett
                                     })()}
                                 </p>
                             </div>
-                            <h4 className="text-xl">Missions:</h4>
+                            <h4 className="text-lg">Missions:</h4>
                             <div className="flex flex-row w-full justify-between">
                                 <p className="text-2xl font-bold">12</p>
                             </div>
@@ -161,7 +172,7 @@ export default function Settings({ workspaces, setWorkspaces, equipments }: Sett
                                 Delete Workspace
                             </button>
                             {workspace.workspace_id === el.id ? (
-                                <button className="bg-primary/70 self-center backdrop-blur-xl hover:bg-primary/80 px-4 py-2 text-white font-semibold rounded-xl transition duration-200 mt-2">
+                                <button className="bg-primary/70 self-center backdrop-blur-xl hover:bg-primary/80 text-alternate text-shadow-alternate px-4 py-2 font-semibold rounded-xl transition duration-200 mt-2">
                                     Current Workspace
                                 </button>
                             ) : (
@@ -193,7 +204,7 @@ export default function Settings({ workspaces, setWorkspaces, equipments }: Sett
                             )}
                         </div>
                     )) : (
-                        <h1 className="text-primary font-k2d font-normal md:text-start text-center text-md">No Workspaces Found</h1>
+                        <h1 className="text-gray-900 font-k2d font-normal md:text-start text-center text-md">No Workspaces Found</h1>
                     )}
                 </div>
 
@@ -205,30 +216,30 @@ export default function Settings({ workspaces, setWorkspaces, equipments }: Sett
                         <form
                             onSubmit={handleCreateWorkspace}
                             onClick={(e) => e.stopPropagation()}
-                            className="flex flex-col gap-4 max-w-md w-full border border-white/70 bg-blue-200 p-6 rounded-lg"
+                            className="flex flex-col gap-4 max-w-md w-full border border-gray-200 bg-white p-6 rounded-2xl shadow-lg"
                         >
-                            <label>
+                            <label className="text-gray-900 font-semibold">
                                 New WorkSpace Name:
                                 <input
                                     type="text"
                                     placeholder="Workspace Name"
-                                    className="w-full p-3 rounded-md text-primary bg-secondary border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full p-3 rounded-lg text-gray-900 bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary mt-2"
                                     value={workSpaceData.name}
                                     onChange={(e) => setWorkSpaceData({ ...workSpaceData, name: e.target.value })}
                                 />
                             </label>
-                            <label>
+                            <label className="text-gray-900 font-semibold">
                                 New WorkSpace Description:
                                 <textarea
                                     placeholder="Workspace Description"
-                                    className="w-full p-3 rounded-md text-primary bg-secondary border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full p-3 rounded-lg text-gray-900 bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary mt-2"
                                     value={workSpaceData.description}
                                     onChange={(e) => setWorkSpaceData({ ...workSpaceData, description: e.target.value })}
                                 />
                             </label>
                             <button
                                 type="submit"
-                                className="bg-green-600/70 backdrop-blur-xl hover:bg-green-600/80 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition duration-200"
+                                className="bg-secondary hover:bg-indigo-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg"
                             >
                                 Create Workspace
                             </button>
@@ -237,29 +248,29 @@ export default function Settings({ workspaces, setWorkspaces, equipments }: Sett
                 )}
             </div>
 
-            <div className="flex flex-col items-center md:items-start justify-between w-full gap-4 text-primary">
-                <h1 className="text-primary font-normal md:text-2xl md:text-start text-center text-xl">Account Info:</h1>
-                <div className="flex flex-wrap gap-4 items-center justify-start w-full">
+            <div className="flex flex-col items-center md:items-start justify-between w-full gap-4 text-gray-700">
+                <h1 className="text-gray-900 font-normal md:text-2xl md:text-start text-center text-xl">Account Info:</h1>
+                <div className="flex flex-wrap gap-4 items-center justify-start w-full text-gray-600">
                     <p>Username: admin</p>
                     <p>Email: {user?.email}</p>
-                    <p>Total Missions Created: 12</p>
-                    <p>Total Equipments: 8</p>
+                    <p>Total Missions Created: {missions.filter(el => el.user_id === user?.id).length}</p>
+                    <p>Total Equipments: {equipments.filter(el => el.user_id === user?.id).length}</p>
                 </div>
             </div>
 
             <div className="flex items-center gap-2.5 flex-wrap">
-                <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-info/10 text-info border border-info/30 text-sm font-medium transition-all duration-150 hover:opacity-85 active:scale-[0.97] cursor-pointer">
+                <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-secondary/10 text-secondary border border-secondary/30 text-sm font-medium transition-all duration-150 hover:opacity-85 active:scale-[0.97] cursor-pointer shadow-md hover:shadow-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" /><path d="M16 5l3 3" /></svg>
                     Edit Account
                 </button>
                 <button
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-secondary text-primary border border-border-secondary text-sm font-medium transition-all duration-150 hover:bg-tertiary hover:border-border-primary active:scale-[0.97] cursor-pointer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-secondary text-white border border-secondary text-sm font-medium transition-all duration-150 hover:bg-indigo-600 hover:border-indigo-600 active:scale-[0.97] cursor-pointer shadow-md hover:shadow-lg"
                     onClick={handleLogout}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" /><path d="M9 12h12l-3 -3m0 6l3 -3" /></svg>
                     Logout
                 </button>
-                <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-danger/10 text-danger border border-danger/30 text-sm font-medium transition-all duration-150 hover:opacity-85 active:scale-[0.97] cursor-pointer">
+                <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-red-500/10 text-red-600 border border-red-500/30 text-sm font-medium transition-all duration-150 hover:opacity-85 active:scale-[0.97] cursor-pointer shadow-md hover:shadow-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
                     Delete Account
                 </button>

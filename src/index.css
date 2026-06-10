@@ -5,20 +5,33 @@
 
 @theme {
     --font-k2d: 'K2D', sans-serif;
-    --color-primary: #0D0045;
-    --color-secondary: #E0EEFF;
-    --color-cardbg: #2C3B50;
-    --color-warning: #ffc107;
-    --color-danger: #dc3545;
-    --color-alternate: #325F96;
+    --color-primary: #F8F9FA;
+    --color-secondary: #6366F1;
+    --color-cardbg: #FFFFFF;
+    --color-warning: #F59E0B;
+    --color-danger: #EF4444;
+    --color-alternate: #6366F1;
     --font-inter: 'Inter', sans-serif;
 }
 
 
 body {
     font-family: var(--font-k2d);
-    background-color: var(--color-primary);
+    background: linear-gradient(135deg, #F8F9FA 0%, #F3F4F6 100%);
+    color: #1F2937;
 }
 
+/* Rounded corners and shadows */
+@layer components {
+    .rounded-card {
+        @apply rounded-2xl;
+    }
 
+    .shadow-claude {
+        @apply shadow-lg hover:shadow-xl transition-shadow duration-200;
+    }
 
+    .btn-primary {
+        @apply rounded-lg shadow-md hover:shadow-lg transition-all duration-200;
+    }
+}

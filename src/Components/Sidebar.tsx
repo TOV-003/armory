@@ -26,9 +26,9 @@ function Sidebar({ activeView, setActiveView }: SidebarProps) {
   if (isMobile) {
     return (
       <>
-        <div className="fixed top-0 left-0 right-0 h-16 bg-primary border-b border-cardbg flex items-center justify-between px-4 text-white z-50">
+        <div className="fixed top-0 left-0 right-0 h-16 bg-cardbg border-b border-gray-200 flex items-center justify-between px-4 text-gray-900 z-50 shadow-md">
           <Link to="/" className="flex gap-2 items-center">
-            <img src={Equipment} alt="Logo" className="w-8" />
+            <img src={Equipment} alt="Logo" className="w-8 invert" />
             <h1 className="font-normal">ARMORY</h1>
           </Link>
           <button onClick={() => setIsOpen(!isOpen)} className="p-2 cursor-pointer text-xl">
@@ -36,26 +36,26 @@ function Sidebar({ activeView, setActiveView }: SidebarProps) {
           </button>
         </div>
 
-        <div className={`fixed inset-y-0 left-0 w-60 bg-primary text-white flex flex-col items-start justify-start gap-16 p-6 z-40 transform transition-transform duration-200 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <div className={`fixed inset-y-0 left-0 w-60 bg-cardbg text-gray-900 flex flex-col items-start justify-start gap-16 p-6 z-40 transform transition-transform duration-200 ease-in-out shadow-lg ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
           <div className="w-full flex flex-col items-start gap-1 mt-16">
-            <button className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg text-white ${activeView === "home" ? "bg-alternate" : "hover:bg-alternate"}`} onClick={() => handleNavigation("home")}>
+            <button className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg transition-all ${activeView === "home" ? "bg-secondary text-white shadow-md" : "text-gray-700 hover:bg-gray-100"}`} onClick={() => handleNavigation("home")}>
               <img src={Home} alt="Logo" />
               <h2 className="font-extralight">Home</h2>
             </button>
-            <button className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg text-white ${activeView === "mission" ? "bg-alternate" : "hover:bg-alternate"}`} onClick={() => handleNavigation("mission")}>
+            <button className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg transition-all ${activeView === "mission" ? "bg-secondary text-white shadow-md" : "text-gray-700 hover:bg-gray-100"}`} onClick={() => handleNavigation("mission")}>
               <img src={Mission} alt="Logo" />
               <h2 className="font-extralight">Missions</h2>
             </button>
-            <button className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg text-white ${activeView === "equipment" ? "bg-alternate" : "hover:bg-alternate"}`} onClick={() => handleNavigation("equipment")}>
+            <button className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg transition-all ${activeView === "equipment" ? "bg-secondary text-white shadow-md" : "text-gray-700 hover:bg-gray-100"}`} onClick={() => handleNavigation("equipment")}>
               <img src={Equipment} alt="Logo" />
               <h2 className="font-extralight">Equipment</h2>
             </button>
-            <button className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg text-white ${activeView === "settings" ? "bg-alternate" : "hover:bg-alternate"}`} onClick={() => handleNavigation("settings")}>
+            <button className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg transition-all ${activeView === "settings" ? "bg-secondary text-white shadow-md" : "text-gray-700 hover:bg-gray-100"}`} onClick={() => handleNavigation("settings")}>
               <img src={Settings} alt="Logo" />
               <h2 className="font-extralight">Settings</h2>
             </button>
           </div>
-          <button className={`flex mt-auto gap-2 items-center px-7 py-5 w-full  rounded-lg text-white `}>
+          <button className={`flex mt-auto gap-2 items-center px-7 py-5 w-full rounded-lg text-gray-700 hover:bg-gray-100 transition-all`}>
             <img src={Equipment} alt="Logo" />
             <h2 className="font-extralight">{user?.user_metadata.name || "Account"}</h2>
           </button>
@@ -66,15 +66,15 @@ function Sidebar({ activeView, setActiveView }: SidebarProps) {
   }
 
   return (
-    <div className="w-60 flex flex-col items-start justify-start text-white gap-16 min-h-full">
-      <Link to="/" className="flex gap-2 items-center">
+    <div className="w-60 flex flex-col items-start justify-start text-gray-900 gap-16 min-h-full bg-cardbg shadow-lg rounded-r-2xl">
+      <Link to="/" className="flex gap-2 items-center pt-6 px-6">
         <img src={Equipment} alt="Logo" className="w-8" />
         <h1 className="font-normal">ARMORY</h1>
       </Link>
 
-      <div className="w-full flex flex-col items-start gap-1">
+      <div className="w-full flex flex-col items-start gap-1 px-4">
         <button
-          className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg text-white ${activeView === "home" ? "bg-alternate" : "hover:bg-alternate"}`}
+          className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg transition-all ${activeView === "home" ? "bg-secondary text-white shadow-md" : "text-gray-700 hover:bg-gray-100"}`}
           onClick={() => setActiveView("home")}
         >
           <img src={Home} alt="Logo" />
@@ -82,7 +82,7 @@ function Sidebar({ activeView, setActiveView }: SidebarProps) {
         </button>
 
         <button
-          className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg text-white ${activeView === "mission" ? "bg-alternate" : "hover:bg-alternate"}`}
+          className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg transition-all ${activeView === "mission" ? "bg-secondary text-white shadow-md" : "text-gray-700 hover:bg-gray-100"}`}
           onClick={() => setActiveView("mission")}
         >
           <img src={Mission} alt="Logo" />
@@ -90,7 +90,7 @@ function Sidebar({ activeView, setActiveView }: SidebarProps) {
         </button>
 
         <button
-          className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg text-white ${activeView === "equipment" ? "bg-alternate" : "hover:bg-alternate"}`}
+          className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg transition-all ${activeView === "equipment" ? "bg-secondary text-white shadow-md" : "text-gray-700 hover:bg-gray-100"}`}
           onClick={() => setActiveView("equipment")}
         >
           <img src={Equipment} alt="Logo" />
@@ -99,7 +99,7 @@ function Sidebar({ activeView, setActiveView }: SidebarProps) {
 
 
         <button
-          className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg text-white ${activeView === "settings" ? "bg-alternate" : "hover:bg-alternate"}`}
+          className={`flex gap-2 items-center px-7 py-5 w-full cursor-pointer rounded-lg transition-all ${activeView === "settings" ? "bg-secondary text-white shadow-md" : "text-gray-700 hover:bg-gray-100"}`}
           onClick={() => setActiveView("settings")}
         >
           <img src={Settings} alt="Logo" />
@@ -108,7 +108,7 @@ function Sidebar({ activeView, setActiveView }: SidebarProps) {
       </div>
 
       <button
-        className={`flex mt-auto gap-2 items-center px-7 py-5 w-full rounded-lg text-white `}
+        className={`flex mt-auto gap-2 items-center px-7 py-5 w-full rounded-lg text-gray-700 hover:bg-gray-100 transition-all mb-6`}
       >
         <img src={Equipment} alt="Logo" />
         <h2 className="font-extralight">{user?.user_metadata.name || "Account"}</h2>

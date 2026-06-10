@@ -115,12 +115,12 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
 
 
     return (
-        <div className="flex flex-col w-full bg-secondary md:h-full rounded-2xl p-2 gap-5 items-center justify-center">
+        <div className="flex flex-col w-full bg-linear-to-br from-white to-gray-50 md:h-full rounded-2xl p-6 gap-5 items-center justify-center shadow-lg">
             <div className="flex flex-col items-center md:flex-row justify-between w-full gap-4 md:gap-0">
-                <h1 className="text-primary font-normal md:text-3xl md:text-start text-center text-xl">Missions </h1>
+                <h1 className="text-gray-900 font-normal md:text-3xl md:text-start text-center text-xl">Missions </h1>
 
                 <div className="flex gap-4 items-center justify-center">
-                    <button className="text-base font-inter px-6 py-2 rounded-lg bg-blue-400 text-white font-bold cursor-pointer" onClick={() => setNewMissionModal(true)}>New Mission</button>
+                    <button className="text-base font-inter px-6 py-2 rounded-lg bg-secondary hover:bg-indigo-600 text-white font-bold cursor-pointer shadow-lg hover:shadow-xl transition-all" onClick={() => setNewMissionModal(true)}>New Mission</button>
                     {newMissionModal && (
                         <div
                             onClick={() => setNewMissionModal(false)}
@@ -129,21 +129,21 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
                             <form
                                 onSubmit={handleCreateMission}
                                 onClick={(e) => e.stopPropagation()}
-                                className="flex flex-col gap-4 max-w-md w-full border border-white/70 bg-blue-200 p-6 rounded-lg"
+                                className="flex flex-col gap-4 max-w-md w-full border border-gray-200 bg-white p-6 rounded-2xl shadow-lg"
                             >
-                                <label>
+                                <label className="text-gray-900 font-semibold">
                                     New Mission Name:
                                     <input
                                         type="text"
                                         placeholder="Mission Name"
-                                        className="w-full p-3 rounded-md text-primary bg-secondary border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full p-3 rounded-lg text-gray-900 bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary mt-2"
                                         value={MissionData.name}
                                         onChange={(e) => setMissionData({ ...MissionData, name: e.target.value })}
                                     />
                                 </label>
                                 <button
                                     type="submit"
-                                    className="bg-green-600/70 backdrop-blur-xl hover:bg-green-600/80 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition duration-200"
+                                    className="bg-secondary hover:bg-indigo-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg"
                                 >
                                     Create Mission
                                 </button>
@@ -152,25 +152,25 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
                     )}
                 </div>
             </div>
-            <div className="flex flex-col items-center md:grid md:grid-cols-2 lg:flex-row lg:flex  justify-between w-full gap-2 font-inter">
-                <div className="h-40 w-full  font-normal flex flex-col justify-evenly items-start p-4 rounded-xl bg-cardbg border-l-8 border-[#3E87DF] text-white">
-                    <h4 className="text-2xl">Active Missions</h4>
+            <div className="flex flex-col items-center md:grid md:grid-cols-2 lg:flex-row lg:flex  justify-between w-full gap-4 font-inter">
+                <div className="h-40 w-full  font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border-l-8 border-secondary text-gray-900 shadow-lg hover:shadow-xl transition-shadow">
+                    <h4 className="text-2xl font-semibold">Active Missions</h4>
                     <div className="flex flex-row w-full justify-between">
-                        <p className="text-6xl font-bold">{missions.filter(el => el.workspace_id === workspace.workspace_id).filter(el => el.status === "ACTIVE").length}</p>
+                        <p className="text-6xl font-bold text-secondary">{missions.filter(el => el.workspace_id === workspace.workspace_id).filter(el => el.status === "ACTIVE").length}</p>
                         <img src={Active} alt="Logo" />
                     </div>
                 </div>
-                <div className="h-40 w-full  font-normal flex flex-col justify-evenly items-start p-4 rounded-xl bg-cardbg border-l-8 border-[#919191] text-white">
-                    <h4 className="text-2xl">Completed Missions</h4>
+                <div className="h-40 w-full  font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border-l-8 border-gray-400 text-gray-900 shadow-lg hover:shadow-xl transition-shadow">
+                    <h4 className="text-2xl font-semibold">Completed Missions</h4>
                     <div className="flex flex-row w-full justify-between">
-                        <p className="text-6xl font-bold">{missions.filter(el => el.status === "COMPLETED").length}</p>
+                        <p className="text-6xl font-bold text-gray-400">{missions.filter(el => el.status === "COMPLETED").length}</p>
                         <img src={Decommissioned} alt="Logo" />
                     </div>
                 </div>
             </div>
-            <div className="col-span-5 bg-cardbg h-full rounded-xl p-2 w-full flex flex-col items-start overflow-y-auto">
-                <h4 className="text-xl text-white font-semibold w-full text-center">Active Missions</h4>
-                <div className="grid grid-cols-6 place-items-center text-white w-full gap-2">
+            <div className="col-span-5 bg-white h-full rounded-2xl p-4 w-full flex flex-col items-start overflow-y-auto shadow-lg">
+                <h4 className="text-xl text-gray-900 font-semibold w-full text-center pb-4">Active Missions</h4>
+                <div className="grid grid-cols-6 place-items-center text-gray-900 w-full gap-2">
                     <p className="text-lg font-semibold col-span-1">Name</p>
                     <div className="flex flex-row gap-4 w-full col-span-3 text-center">
                         <p className="text-lg font-semibold w-full">Start Date</p>
@@ -181,7 +181,7 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
 
                     {missions.filter(el => el.workspace_id === workspace.workspace_id).map((el) => (
                         <>
-                            <button className="text-lg font-semibold w-full col-span-1 text-center cursor-pointer hover:bg-white/10 rounded-lg">{el.name}</button>
+                            <button className="text-lg font-semibold w-full col-span-1 text-center cursor-pointer hover:bg-gray-100 rounded-lg">{el.name}</button>
                             <div className="flex flex-row gap-4 w-full col-span-3">
                                 <p className="text-lg font-semibold w-full text-center">
                                     {new Date(el.start_date).toISOString().split('T')[0]}
@@ -192,7 +192,7 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
                                 </p>
                             </div>
                             <div className="flex flex-row gap-2 col-span-2 justify-center">
-                                <button onClick={() => setAddEquipmentModal(true)} className="bg-blue-600/70 backdrop-blur-xl hover:bg-blue-600/80 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition duration-200">
+                                <button onClick={() => setAddEquipmentModal(true)} className="bg-secondary hover:bg-indigo-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg">
                                     Add Equipment
                                 </button>
                                 {
@@ -203,20 +203,20 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
                                         >
                                             <div
                                                 onClick={(e) => e.stopPropagation()}
-                                                className="flex flex-col gap-4 max-w-md w-full border border-white/70 bg-blue-200 p-6 rounded-lg"
+                                                className="flex flex-col gap-4 max-w-md w-full border border-gray-200 bg-white p-6 rounded-2xl shadow-lg"
                                             >
-                                                <p className="font-semibold text-sm text-gray-700">All Equipment</p>
+                                                <p className="font-semibold text-sm text-gray-900">All Equipment</p>
                                                 <div className="flex flex-col gap-2">
                                                     {equipments.filter(eq => eq.workspace_id === workspace.workspace_id).filter(item => item.state === "AVAILABLE").length > 0 ?
                                                         equipments.filter(eq => eq.workspace_id === workspace.workspace_id).filter(item => item.state === "AVAILABLE").map((item) => (
                                                             <div
                                                                 key={item.id}
-                                                                className="flex items-center justify-between gap-4 w-full bg-white/50 border border-white/70 rounded-lg px-4 py-2"
+                                                                className="flex items-center justify-between gap-4 w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2"
                                                             >
-                                                                <span className="font-medium text-gray-800 w-full">{item.name}</span>
+                                                                <span className="font-medium text-gray-900 w-full">{item.name}</span>
                                                                 <textarea
                                                                     placeholder="Notes"
-                                                                    className="w-full p-3 rounded-md text-primary bg-secondary border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                                    className="w-full p-3 rounded-lg text-gray-900 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary"
                                                                     value={note}
                                                                     onChange={(e) => setNote(e.target.value)}
                                                                 />
@@ -224,7 +224,7 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
                                                                     type="button"
                                                                     onClick={() => handleAddEquipment(item.id, el.id)}
                                                                     disabled={item.state !== "AVAILABLE"}
-                                                                    className="bg-blue-600/70 w-full backdrop-blur-xl hover:bg-blue-600/80 px-3 py-1 text-white text-sm font-semibold rounded-lg cursor-pointer transition duration-200"
+                                                                    className="bg-secondary hover:bg-indigo-600 w-full px-3 py-1 text-white text-sm font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg"
                                                                 >
                                                                     Add to Mission
                                                                 </button>
@@ -238,7 +238,7 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
                                         </div>
                                     )
                                 }
-                                <button className="bg-green-600/70 backdrop-blur-xl hover:bg-green-600/80 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition duration-200" onClick={() => setMissionStatusModal(true)}>
+                                <button className="bg-green-500 hover:bg-green-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg" onClick={() => setMissionStatusModal(true)}>
                                     Change Status
                                 </button>
                                 {
@@ -249,13 +249,13 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
                                         >
                                             <div
                                                 onClick={(e) => e.stopPropagation()}
-                                                className="flex flex-col gap-4 max-w-md w-full border border-white/70 bg-blue-200 p-6 rounded-lg"
+                                                className="flex flex-col gap-4 max-w-md w-full border border-gray-200 bg-white p-6 rounded-2xl shadow-lg"
                                             >
                                                 <button onClick={() => {
                                                     updateMissionStatus(el.id, "CANCELLED");
 
-                                                }} className="bg-red-600/70 backdrop-blur-xl hover:bg-red-600/80 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition duration-200">Cancel Mission</button>
-                                                <button onClick={() => updateMissionStatus(el.id, "COMPLETED")} className="bg-green-600/70 backdrop-blur-xl hover:bg-green-600/80 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition duration-200">Complete Mission</button>
+                                                }} className="bg-red-500 hover:bg-red-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg">Cancel Mission</button>
+                                                <button onClick={() => updateMissionStatus(el.id, "COMPLETED")} className="bg-green-500 hover:bg-green-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg">Complete Mission</button>
                                             </div>
                                         </div>
                                     )
