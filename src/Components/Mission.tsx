@@ -53,7 +53,8 @@ function Mission({ missions, setMissions, equipments, setEquipments }: SettingsP
     const [missionStatusModal, setMissionStatusModal] = useState<string | null>(null);
     const [equipmentReturnStates, setEquipmentReturnStates] = useState<Record<string, "AVAILABLE" | "DAMAGED" | "DECOMMISSIONED">>({});
     const navigate = useNavigate();
-    const [note, setNote] = useState<string>("");
+    const [addEquipmentNotes, setAddEquipmentNotes] = useState<Record<string, string>>({});
+    const [returnNotes, setReturnNotes] = useState<Record<string, string>>({});
     const [MissionData, setMissionData] = useState({
         name: "",
         start_date: new Date(),
@@ -89,7 +90,7 @@ function Mission({ missions, setMissions, equipments, setEquipments }: SettingsP
         setMissionData({ name: "", start_date: new Date(), equipment: [] });
     }
 
-    async function handleAddEquipment(equipmentId: string, missionId: string) {
+    async function handleAddEquipment(equipmentId: string, missionId: string, note: string) {
         try {
             await updateEquipmentState(equipmentId, "IN_USE");
             await newEquipmentLog(equipmentId, "CHECKOUT", missionId, note, new Date());
@@ -106,7 +107,7 @@ function Mission({ missions, setMissions, equipments, setEquipments }: SettingsP
             toast.error("Failed to add equipment.");
         } finally {
             setAddEquipmentModal(null);
-            setNote("");
+            setAddEquipmentNotes({});
         }
     }
 
@@ -174,6 +175,8 @@ function Mission({ missions, setMissions, equipments, setEquipments }: SettingsP
             toast.error("Failed to cancel mission.");
         } finally {
             setMissionStatusModal(null);
+            setReturnNotes({});
+            setEquipmentReturnStates({});
         }
     }
 
@@ -307,14 +310,21 @@ function Mission({ missions, setMissions, equipments, setEquipments }: SettingsP
                                     {isActive && (
                                         <>
                                             <button
-                                                onClick={() => setAddEquipmentModal(el.id)}
+                                                onClick={() => {
+                                                    setAddEquipmentNotes({});
+                                                    setAddEquipmentModal(el.id);
+                                                }}
                                                 className="bg-secondary hover:bg-indigo-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg"
                                             >
                                                 Add Equipment
                                             </button>
                                             <button
                                                 className="bg-green-500 hover:bg-green-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg"
-                                                onClick={() => setMissionStatusModal(el.id)}
+                                                onClick={() => {
+                                                    setReturnNotes({});
+                                                    setEquipmentReturnStates({});
+                                                    setMissionStatusModal(el.id);
+                                                }}
                                             >
                                                 Change Status
                                             </button>
@@ -337,7 +347,10 @@ function Mission({ missions, setMissions, equipments, setEquipments }: SettingsP
 
             {addEquipmentModal && addEquipmentMissionForModal && (
                 <div
-                    onClick={() => setAddEquipmentModal(null)}
+                    onClick={() => {
+                        setAddEquipmentModal(null);
+                        setAddEquipmentNotes({});
+                    }}
                     className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
                 >
                     <div
@@ -361,12 +374,12 @@ function Mission({ missions, setMissions, equipments, setEquipments }: SettingsP
                                             <textarea
                                                 placeholder="Notes"
                                                 className="w-full p-3 rounded-lg text-gray-900 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary"
-                                                value={note}
-                                                onChange={(e) => setNote(e.target.value)}
+                                                value={addEquipmentNotes[item.id] || ""}
+                                                onChange={(e) => setAddEquipmentNotes(prev => ({ ...prev, [item.id]: e.target.value }))}
                                             />
                                             <button
                                                 type="button"
-                                                onClick={() => handleAddEquipment(item.id, addEquipmentMissionForModal.id)}
+                                                onClick={() => handleAddEquipment(item.id, addEquipmentMissionForModal.id, addEquipmentNotes[item.id] || "")}
                                                 className="bg-secondary hover:bg-indigo-600 w-full px-3 py-1 text-white text-sm font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg"
                                             >
                                                 Add to Mission
@@ -383,7 +396,11 @@ function Mission({ missions, setMissions, equipments, setEquipments }: SettingsP
 
             {missionStatusModal && activeMissionForModal && (
                 <div
-                    onClick={() => setMissionStatusModal(null)}
+                    onClick={() => {
+                        setMissionStatusModal(null);
+                        setReturnNotes({});
+                        setEquipmentReturnStates({});
+                    }}
                     className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
                 >
                     <div
@@ -415,30 +432,39 @@ function Mission({ missions, setMissions, equipments, setEquipments }: SettingsP
                                     .map((item) => (
                                         <div
                                             key={item.id}
-                                            className="flex items-center justify-between gap-3 w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2"
+                                            className="flex flex-col gap-2 w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2"
                                         >
-                                            <span className="font-medium text-gray-900 flex-1">{item.name}</span>
-                                            <div className="flex gap-2">
-                                                {(["AVAILABLE", "DAMAGED", "DECOMMISSIONED"] as const).map((state) => (
-                                                    <button
-                                                        key={state}
-                                                        type="button"
-                                                        onClick={() =>
-                                                            setEquipmentReturnStates((prev) => ({ ...prev, [item.id]: state }))
-                                                        }
-                                                        className={`px-2 py-1 rounded-md text-xs font-semibold border transition-all ${equipmentReturnStates[item.id] === state
+                                            <div className="flex items-center justify-between w-full">
+                                                <span className="font-medium text-gray-900">{item.name}</span>
+                                                <div className="flex gap-2">
+                                                    {(["AVAILABLE", "DAMAGED", "DECOMMISSIONED"] as const).map((state) => (
+                                                        <button
+                                                            key={state}
+                                                            type="button"
+                                                            onClick={() =>
+                                                                setEquipmentReturnStates((prev) => ({ ...prev, [item.id]: state }))
+                                                            }
+                                                            className={`px-2 py-1 rounded-md text-xs font-semibold border transition-all ${equipmentReturnStates[item.id] === state
                                                                 ? state === "AVAILABLE"
                                                                     ? "bg-blue-100 text-blue-700 border-blue-400"
                                                                     : state === "DAMAGED"
                                                                         ? "bg-yellow-100 text-yellow-700 border-yellow-400"
                                                                         : "bg-gray-200 text-gray-700 border-gray-400"
                                                                 : "bg-white text-gray-400 border-gray-200 hover:border-gray-400"
-                                                            }`}
-                                                    >
-                                                        {state}
-                                                    </button>
-                                                ))}
+                                                                }`}
+                                                        >
+                                                            {state}
+                                                        </button>
+                                                    ))}
+                                                </div>
                                             </div>
+                                            <textarea
+                                                placeholder="Return notes (optional)"
+                                                className="w-full p-3 rounded-lg text-gray-900 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary"
+                                                value={returnNotes[item.id] || ""}
+                                                onChange={(e) => setReturnNotes(prev => ({ ...prev, [item.id]: e.target.value }))}
+                                                rows={2}
+                                            />
                                         </div>
                                     ))
                             ) : (
@@ -459,7 +485,8 @@ function Mission({ missions, setMissions, equipments, setEquipments }: SettingsP
                                 await Promise.all(
                                     missionEquipment.map((item) => {
                                         const returnState = equipmentReturnStates[item.id] ?? "AVAILABLE";
-                                        return updateEquipmentReturn(item.id, activeMissionForModal.id, returnState, note);
+                                        const noteText = returnNotes[item.id] || "";
+                                        return updateEquipmentReturn(item.id, activeMissionForModal.id, returnState, noteText);
                                     })
                                 );
 
@@ -474,7 +501,7 @@ function Mission({ missions, setMissions, equipments, setEquipments }: SettingsP
                                 setEquipmentLogs(refreshed || []);
 
                                 setMissionStatusModal(null);
-                                setNote("");
+                                setReturnNotes({});
                                 setEquipmentReturnStates({});
                                 toast.success("Mission completed and equipment returned.");
                             }}
