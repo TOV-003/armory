@@ -1,5 +1,5 @@
 import Active from "../assets/Active.svg";
-import Decommissioned from "../assets/Decommissioned.svg"
+import Decommissioned from "../assets/Decommissioned.svg";
 import { useAuth } from "../context/useAuth";
 import { useState, useEffect } from "react";
 import { Fragment } from "react";
@@ -46,9 +46,7 @@ interface EquipmentLog {
     timestamp: Date;
 }
 
-
-function Mission({ missions, setMissions, equipments }: SettingsProps) {
-
+function Mission({ missions, setMissions, equipments, setEquipments }: SettingsProps) {
     const { user, workspace, createMission, updateEquipmentState, newEquipmentLog, getEquipmentLogs, updateMissionStatus } = useAuth();
     const [newMissionModal, setNewMissionModal] = useState<boolean>(false);
     const [addEquipmentModal, setAddEquipmentModal] = useState<string | null>(null);
@@ -59,37 +57,33 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
     const [MissionData, setMissionData] = useState({
         name: "",
         start_date: new Date(),
-        equipment: []
+        equipment: [],
     });
     const [equipmentLogs, setEquipmentLogs] = useState<EquipmentLog[]>([]);
+    const [viewMode, setViewMode] = useState<"active" | "completed">("active");
 
     useEffect(() => {
         async function fetchEquipmentLogs() {
             try {
                 const fetchedData = await getEquipmentLogs(user?.id || "");
                 setEquipmentLogs(fetchedData || []);
-                console.log(fetchedData);
-            }
-            catch (error) {
+            } catch (error) {
                 console.error("Error fetching equipment logs:", error);
             }
         }
         fetchEquipmentLogs();
-    }, [getEquipmentLogs, user])
+    }, [getEquipmentLogs, user]);
 
     useEffect(() => {
         if (!user) {
-            navigate('/login');
+            navigate("/login");
         }
-        console.log(workspace.workspace_name);
-        console.log(equipments);
-    }, [user, navigate, workspace, equipments]);
+    }, [user, navigate]);
 
-    async function handleCreateMission(e: React.SubmitEvent<HTMLFormElement>) {
+    async function handleCreateMission(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        setNewMissionModal(true);
         const newMission = await createMission(MissionData.name, MissionData.start_date);
-        setMissions(prev => [...prev, newMission]);
+        setMissions((prev) => [...prev, newMission]);
         toast.success("Mission created successfully!");
         setNewMissionModal(false);
         setMissionData({ name: "", start_date: new Date(), equipment: [] });
@@ -99,117 +93,123 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
         try {
             await updateEquipmentState(equipmentId, "IN_USE");
             await newEquipmentLog(equipmentId, "CHECKOUT", missionId, note, new Date());
-        }
-        catch (error) {
-            console.error("Error adding equipment to mission:", error);
-        }
-        finally {
+
+            setEquipments((prev) =>
+                prev.map((eq) => (eq.id === equipmentId ? { ...eq, state: "IN_USE" } : eq))
+            );
+
             const refreshed = await getEquipmentLogs(user?.id || "");
             setEquipmentLogs(refreshed || []);
             toast.success("Equipment added to mission successfully!");
+        } catch (error) {
+            console.error("Error adding equipment to mission:", error);
+            toast.error("Failed to add equipment.");
+        } finally {
             setAddEquipmentModal(null);
             setNote("");
         }
     }
 
-    async function handleRemoveEquipmentMarkAsAvailable(equipmentId: string, missionId: string) {
-        try {
-            await updateEquipmentState(equipmentId, "AVAILABLE");
-            await newEquipmentLog(equipmentId, "RETURN_OK", missionId, note, new Date());
+    async function updateEquipmentReturn(
+        equipmentId: string,
+        missionId: string,
+        returnType: "AVAILABLE" | "DAMAGED" | "DECOMMISSIONED",
+        noteText: string
+    ) {
+        let newState: string;
+        let action: string;
+
+        switch (returnType) {
+            case "AVAILABLE":
+                newState = "AVAILABLE";
+                action = "RETURN_OK";
+                break;
+            case "DAMAGED":
+                newState = "DAMAGED";
+                action = "RETURN_DAMAGED";
+                break;
+            case "DECOMMISSIONED":
+                newState = "DECOMMISSIONED";
+                action = "RETIRED";
+                break;
         }
-        catch (error) {
-            console.error("Error removing equipment mark as available:", error);
-        }
-        finally {
-            const refreshed = await getEquipmentLogs(user?.id || "");
-            setEquipmentLogs(refreshed || []);
-            toast.success("Equipment removed from mission successfully!");
-            setMissionStatusModal(null);
-            setNote("");
-        }
+
+        await updateEquipmentState(equipmentId, newState);
+        await newEquipmentLog(equipmentId, action, missionId, noteText, new Date());
+
+        setEquipments((prev) => prev.map((eq) => (eq.id === equipmentId ? { ...eq, state: newState } : eq)));
     }
 
-    async function handleRemoveEquipmentMarkAsDecommissioned(equipmentId: string, missionId: string) {
-        try {
-            await updateEquipmentState(equipmentId, "DECOMMISSIONED");
-            await newEquipmentLog(equipmentId, "RETIRED", missionId, note, new Date());
-        }
-        catch (error) {
-            console.error("Error removing equipment mark as decommissioned:", error);
-        }
-        finally {
-            const refreshed = await getEquipmentLogs(user?.id || "");
-            setEquipmentLogs(refreshed || []);
-            toast.success("Equipment removed from mission successfully!");
-            setMissionStatusModal(null);
-            setNote("");
-        }
-    }
-
-    async function handleRemoveEquipmentMarkAsDamaged(equipmentId: string, missionId: string) {
-        try {
-            await updateEquipmentState(equipmentId, "DAMAGED");
-            await newEquipmentLog(equipmentId, "RETURN_DAMAGED", missionId, note, new Date());
-        }
-        catch (error) {
-            console.error("Error removing equipment mark as damaged:", error);
-        }
-        finally {
-            const refreshed = await getEquipmentLogs(user?.id || "");
-            setEquipmentLogs(refreshed || []);
-            toast.success("Equipment removed from mission successfully!");
-            setMissionStatusModal(null);
-            setNote("");
-        }
-    }
     async function handleCancelMission(missionId: string) {
         try {
             const missionEquipment = equipments
-                .filter(eq => eq.workspace_id === workspace.workspace_id)
-                .filter(item =>
+                .filter((eq) => eq.workspace_id === workspace.workspace_id)
+                .filter((item) =>
                     equipmentLogs.some(
-                        log =>
-                            log.equipment_id === item.id &&
-                            log.mission_id === missionId
+                        (log) => log.equipment_id === item.id && log.mission_id === missionId
                     )
                 );
 
             await Promise.all(
                 missionEquipment.map(async (item) => {
                     await updateEquipmentState(item.id, "AVAILABLE");
-                    await newEquipmentLog(
-                        item.id,
-                        "RETURN_OK",
-                        missionId,
-                        "Mission cancelled",
-                        new Date()
+                    await newEquipmentLog(item.id, "RETURN_OK", missionId, "Mission cancelled", new Date());
+                    setEquipments((prev) =>
+                        prev.map((eq) => (eq.id === item.id ? { ...eq, state: "AVAILABLE" } : eq))
                     );
                 })
             );
 
             await updateMissionStatus(missionId, "CANCELLED");
+            setMissions((prev) =>
+                prev.map((m) => (m.id === missionId ? { ...m, status: "CANCELLED" } : m))
+            );
 
             const refreshed = await getEquipmentLogs(user?.id || "");
             setEquipmentLogs(refreshed || []);
 
             toast.success("Mission cancelled and all equipment returned.");
-            setMissionStatusModal(null);
         } catch (error) {
             console.error("Error cancelling mission:", error);
             toast.error("Failed to cancel mission.");
+        } finally {
+            setMissionStatusModal(null);
         }
     }
 
-    const activeMissionForModal = missionStatusModal ? missions.find(m => m.id === missionStatusModal) : null;
-    const addEquipmentMissionForModal = addEquipmentModal ? missions.find(m => m.id === addEquipmentModal) : null;
+    const activeMissionForModal = missionStatusModal
+        ? missions.find((m) => m.id === missionStatusModal && m.status === "ACTIVE")
+        : null;
+    const addEquipmentMissionForModal = addEquipmentModal
+        ? missions.find((m) => m.id === addEquipmentModal)
+        : null;
+
+    const filteredMissions = missions
+        .filter((el) => el.workspace_id === workspace.workspace_id)
+        .filter((el) => {
+            if (viewMode === "active") {
+                return el.status === "ACTIVE";
+            } else {
+                return el.status === "COMPLETED" || el.status === "CANCELLED";
+            }
+        });
+
+    const tableTitle = viewMode === "active" ? "Active Missions" : "Completed & Cancelled Missions";
 
     return (
         <div className="flex flex-col w-full bg-linear-to-br from-white to-gray-50 md:h-full rounded-2xl p-6 gap-5 items-center justify-center shadow-lg">
             <div className="flex flex-col items-center md:flex-row justify-between w-full gap-4 md:gap-0">
-                <h1 className="text-gray-900 font-normal md:text-3xl md:text-start text-center text-xl">Missions </h1>
+                <h1 className="text-gray-900 font-normal md:text-3xl md:text-start text-center text-xl">
+                    Missions
+                </h1>
 
                 <div className="flex gap-4 items-center justify-center">
-                    <button className="text-base font-inter px-6 py-2 rounded-lg bg-secondary hover:bg-indigo-600 text-white font-bold cursor-pointer shadow-lg hover:shadow-xl transition-all" onClick={() => setNewMissionModal(true)}>New Mission</button>
+                    <button
+                        className="text-base font-inter px-6 py-2 rounded-lg bg-secondary hover:bg-indigo-600 text-white font-bold cursor-pointer shadow-lg hover:shadow-xl transition-all"
+                        onClick={() => setNewMissionModal(true)}
+                    >
+                        New Mission
+                    </button>
                     {newMissionModal && (
                         <div
                             onClick={() => setNewMissionModal(false)}
@@ -241,24 +241,40 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
                     )}
                 </div>
             </div>
-            <div className="flex flex-col items-center md:grid md:grid-cols-2 lg:flex-row lg:flex  justify-between w-full gap-4 font-inter">
-                <div className="h-40 w-full  font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border-l-8 border-secondary text-gray-900 shadow-lg hover:shadow-xl transition-shadow">
+
+            <div className="flex flex-col items-center md:grid md:grid-cols-2 lg:flex-row lg:flex justify-between w-full gap-4 font-inter">
+                <div
+                    onClick={() => setViewMode("active")}
+                    className={`h-40 w-full font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border-l-8 transition-all cursor-pointer shadow-lg hover:shadow-xl ${viewMode === "active" ? "border-secondary ring-2 ring-secondary/30" : "border-secondary"
+                        }`}
+                >
                     <h4 className="text-2xl font-semibold">Active Missions</h4>
                     <div className="flex flex-row w-full justify-between">
-                        <p className="text-6xl font-bold text-secondary">{missions.filter(el => el.workspace_id === workspace.workspace_id).filter(el => el.status === "ACTIVE").length}</p>
+                        <p className="text-6xl font-bold text-secondary">
+                            {missions.filter((el) => el.workspace_id === workspace.workspace_id && el.status === "ACTIVE").length}
+                        </p>
                         <img src={Active} alt="Logo" />
                     </div>
                 </div>
-                <div className="h-40 w-full  font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border-l-8 border-gray-400 text-gray-900 shadow-lg hover:shadow-xl transition-shadow">
+                <div
+                    onClick={() => setViewMode("completed")}
+                    className={`h-40 w-full font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border-l-8 transition-all cursor-pointer shadow-lg hover:shadow-xl ${viewMode === "completed" ? "border-gray-600 ring-2 ring-gray-400/30" : "border-gray-400"
+                        }`}
+                >
                     <h4 className="text-2xl font-semibold">Completed Missions</h4>
                     <div className="flex flex-row w-full justify-between">
-                        <p className="text-6xl font-bold text-gray-400">{missions.filter(el => el.status === "COMPLETED").length}</p>
+                        <p className="text-6xl font-bold text-gray-400">
+                            {missions.filter((el) => el.status === "COMPLETED" || el.status === "CANCELLED").length}
+                        </p>
                         <img src={Decommissioned} alt="Logo" />
                     </div>
                 </div>
             </div>
+
             <div className="col-span-5 bg-white h-full rounded-2xl p-4 w-full flex flex-col items-start overflow-y-auto shadow-lg">
-                <h4 className="text-xl text-gray-900 font-semibold w-full text-center pb-4">Active Missions</h4>
+                <h4 className="text-xl text-gray-900 font-semibold w-full text-center pb-4">
+                    {tableTitle}
+                </h4>
                 <div className="grid grid-cols-6 place-items-center text-gray-900 w-full gap-2">
                     <p className="text-lg font-semibold col-span-1">Name</p>
                     <div className="flex flex-row gap-4 w-full col-span-3 text-center">
@@ -268,34 +284,54 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
                     </div>
                     <p className="text-lg font-semibold col-span-2 text-center">Actions</p>
 
-                    {missions.filter(el => el.workspace_id === workspace.workspace_id).map((el) => (
-                        <Fragment key={el.id}>
-                            <button className="text-lg font-semibold w-full col-span-1 text-center cursor-pointer hover:bg-gray-100 rounded-lg">{el.name}</button>
-                            <div className="flex flex-row gap-4 w-full col-span-3">
-                                <p className="text-lg font-semibold w-full text-center">
-                                    {new Date(el.start_date).toISOString().split('T')[0]}
-                                </p>
-                                <p className="text-lg font-semibold w-full text-center">{el.status}</p>
-                                <p className="text-lg font-semibold w-full text-center">
-                                    {equipmentLogs.filter(eq => eq.mission_id === el.id).length}
-                                </p>
-                            </div>
-                            <div className="flex flex-row gap-2 col-span-2 justify-center">
-                                <button
-                                    onClick={() => setAddEquipmentModal(el.id)}
-                                    className="bg-secondary hover:bg-indigo-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg"
-                                >
-                                    Add Equipment
+                    {filteredMissions.map((el) => {
+                        const activeEquipmentCount = equipmentLogs.filter(
+                            (log) => log.mission_id === el.id && log.action_type === "CHECKOUT"
+                        ).length;
+
+                        const isActive = el.status === "ACTIVE";
+
+                        return (
+                            <Fragment key={el.id}>
+                                <button className="text-lg font-semibold w-full col-span-1 text-center cursor-pointer hover:bg-gray-100 rounded-lg">
+                                    {el.name}
                                 </button>
-                                <button
-                                    className="bg-green-500 hover:bg-green-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg"
-                                    onClick={() => setMissionStatusModal(el.id)}
-                                >
-                                    Change Status
-                                </button>
-                            </div>
-                        </Fragment>
-                    ))}
+                                <div className="flex flex-row gap-4 w-full col-span-3">
+                                    <p className="text-lg font-semibold w-full text-center">
+                                        {new Date(el.start_date).toISOString().split("T")[0]}
+                                    </p>
+                                    <p className="text-lg font-semibold w-full text-center">{el.status}</p>
+                                    <p className="text-lg font-semibold w-full text-center">{activeEquipmentCount}</p>
+                                </div>
+                                <div className="flex flex-row gap-2 col-span-2 justify-center">
+                                    {isActive && (
+                                        <>
+                                            <button
+                                                onClick={() => setAddEquipmentModal(el.id)}
+                                                className="bg-secondary hover:bg-indigo-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg"
+                                            >
+                                                Add Equipment
+                                            </button>
+                                            <button
+                                                className="bg-green-500 hover:bg-green-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg"
+                                                onClick={() => setMissionStatusModal(el.id)}
+                                            >
+                                                Change Status
+                                            </button>
+                                        </>
+                                    )}
+                                    {!isActive && viewMode === "completed" && (
+                                        <span className="text-gray-400 italic">No actions</span>
+                                    )}
+                                </div>
+                            </Fragment>
+                        );
+                    })}
+                    {filteredMissions.length === 0 && (
+                        <div className="col-span-6 text-center text-gray-500 py-8">
+                            No missions to display.
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -310,31 +346,36 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
                     >
                         <p className="font-semibold text-sm text-gray-900">All Equipment</p>
                         <div className="flex flex-col gap-2">
-                            {equipments.filter(eq => eq.workspace_id === workspace.workspace_id).filter(item => item.state === "AVAILABLE").length > 0 ?
-                                equipments.filter(eq => eq.workspace_id === workspace.workspace_id).filter(item => item.state === "AVAILABLE").map((item) => (
-                                    <div
-                                        key={item.id}
-                                        className="flex items-center justify-between gap-4 w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2"
-                                    >
-                                        <span className="font-medium text-gray-900 w-full">{item.name}</span>
-                                        <textarea
-                                            placeholder="Notes"
-                                            className="w-full p-3 rounded-lg text-gray-900 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary"
-                                            value={note}
-                                            onChange={(e) => setNote(e.target.value)}
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => handleAddEquipment(item.id, addEquipmentMissionForModal.id)}
-                                            className="bg-secondary hover:bg-indigo-600 w-full px-3 py-1 text-white text-sm font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg"
+                            {equipments
+                                .filter((eq) => eq.workspace_id === workspace.workspace_id)
+                                .filter((item) => item.state === "AVAILABLE").length > 0 ? (
+                                equipments
+                                    .filter((eq) => eq.workspace_id === workspace.workspace_id)
+                                    .filter((item) => item.state === "AVAILABLE")
+                                    .map((item) => (
+                                        <div
+                                            key={item.id}
+                                            className="flex flex-col gap-2 w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2"
                                         >
-                                            Add to Mission
-                                        </button>
-                                    </div>
-                                ))
-                                :
+                                            <span className="font-medium text-gray-900">{item.name}</span>
+                                            <textarea
+                                                placeholder="Notes"
+                                                className="w-full p-3 rounded-lg text-gray-900 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary"
+                                                value={note}
+                                                onChange={(e) => setNote(e.target.value)}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => handleAddEquipment(item.id, addEquipmentMissionForModal.id)}
+                                                className="bg-secondary hover:bg-indigo-600 w-full px-3 py-1 text-white text-sm font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg"
+                                            >
+                                                Add to Mission
+                                            </button>
+                                        </div>
+                                    ))
+                            ) : (
                                 <div className="text-gray-600">No Equipment Available!</div>
-                            }
+                            )}
                         </div>
                     </div>
                 </div>
@@ -355,14 +396,22 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
                         >
                             Cancel Mission
                         </button>
+
                         <div className="flex flex-col gap-2">
                             {equipments
-                                .filter(eq => eq.workspace_id === workspace.workspace_id)
-                                .filter(item => equipmentLogs.some(log => log.equipment_id === item.id && log.mission_id === activeMissionForModal.id))
-                                .length > 0 ? (
+                                .filter((eq) => eq.workspace_id === workspace.workspace_id)
+                                .filter((item) =>
+                                    equipmentLogs.some(
+                                        (log) => log.equipment_id === item.id && log.mission_id === activeMissionForModal.id
+                                    )
+                                ).length > 0 ? (
                                 equipments
-                                    .filter(eq => eq.workspace_id === workspace.workspace_id)
-                                    .filter(item => equipmentLogs.some(log => log.equipment_id === item.id && log.mission_id === activeMissionForModal.id))
+                                    .filter((eq) => eq.workspace_id === workspace.workspace_id)
+                                    .filter((item) =>
+                                        equipmentLogs.some(
+                                            (log) => log.equipment_id === item.id && log.mission_id === activeMissionForModal.id
+                                        )
+                                    )
                                     .map((item) => (
                                         <div
                                             key={item.id}
@@ -370,16 +419,20 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
                                         >
                                             <span className="font-medium text-gray-900 flex-1">{item.name}</span>
                                             <div className="flex gap-2">
-                                                {(["AVAILABLE", "DAMAGED", "DECOMMISSIONED"] as const).map(state => (
+                                                {(["AVAILABLE", "DAMAGED", "DECOMMISSIONED"] as const).map((state) => (
                                                     <button
                                                         key={state}
                                                         type="button"
-                                                        onClick={() => setEquipmentReturnStates(prev => ({ ...prev, [item.id]: state }))}
+                                                        onClick={() =>
+                                                            setEquipmentReturnStates((prev) => ({ ...prev, [item.id]: state }))
+                                                        }
                                                         className={`px-2 py-1 rounded-md text-xs font-semibold border transition-all ${equipmentReturnStates[item.id] === state
-                                                            ? state === "AVAILABLE" ? "bg-blue-100 text-blue-700 border-blue-400"
-                                                                : state === "DAMAGED" ? "bg-yellow-100 text-yellow-700 border-yellow-400"
-                                                                    : "bg-gray-200 text-gray-700 border-gray-400"
-                                                            : "bg-white text-gray-400 border-gray-200 hover:border-gray-400"
+                                                                ? state === "AVAILABLE"
+                                                                    ? "bg-blue-100 text-blue-700 border-blue-400"
+                                                                    : state === "DAMAGED"
+                                                                        ? "bg-yellow-100 text-yellow-700 border-yellow-400"
+                                                                        : "bg-gray-200 text-gray-700 border-gray-400"
+                                                                : "bg-white text-gray-400 border-gray-200 hover:border-gray-400"
                                                             }`}
                                                     >
                                                         {state}
@@ -392,21 +445,38 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
                                 <div className="text-gray-600">No Equipment in this Mission!</div>
                             )}
                         </div>
+
                         <button
                             onClick={async () => {
                                 const missionEquipment = equipments
-                                    .filter(eq => eq.workspace_id === workspace.workspace_id)
-                                    .filter(item => equipmentLogs.some(log => log.equipment_id === item.id && log.mission_id === activeMissionForModal.id));
+                                    .filter((eq) => eq.workspace_id === workspace.workspace_id)
+                                    .filter((item) =>
+                                        equipmentLogs.some(
+                                            (log) => log.equipment_id === item.id && log.mission_id === activeMissionForModal.id
+                                        )
+                                    );
 
-                                await Promise.all(missionEquipment.map(item => {
-                                    const state = equipmentReturnStates[item.id] ?? "AVAILABLE";
-                                    if (state === "AVAILABLE") return handleRemoveEquipmentMarkAsAvailable(item.id, activeMissionForModal.id);
-                                    if (state === "DAMAGED") return handleRemoveEquipmentMarkAsDamaged(item.id, activeMissionForModal.id);
-                                    if (state === "DECOMMISSIONED") return handleRemoveEquipmentMarkAsDecommissioned(item.id, activeMissionForModal.id);
-                                }));
+                                await Promise.all(
+                                    missionEquipment.map((item) => {
+                                        const returnState = equipmentReturnStates[item.id] ?? "AVAILABLE";
+                                        return updateEquipmentReturn(item.id, activeMissionForModal.id, returnState, note);
+                                    })
+                                );
 
                                 await updateMissionStatus(activeMissionForModal.id, "COMPLETED");
+                                setMissions((prev) =>
+                                    prev.map((m) =>
+                                        m.id === activeMissionForModal.id ? { ...m, status: "COMPLETED" } : m
+                                    )
+                                );
+
+                                const refreshed = await getEquipmentLogs(user?.id || "");
+                                setEquipmentLogs(refreshed || []);
+
                                 setMissionStatusModal(null);
+                                setNote("");
+                                setEquipmentReturnStates({});
+                                toast.success("Mission completed and equipment returned.");
                             }}
                             className="bg-green-500 hover:bg-green-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg"
                         >
@@ -416,7 +486,7 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
                 </div>
             )}
         </div>
-    )
+    );
 }
 
-export default Mission
+export default Mission;
