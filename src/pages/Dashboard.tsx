@@ -119,11 +119,11 @@ function Dashboard() {
       <div className="pt-16 md:pt-0 w-full h-full">
         {
           {
-            home: <Splash />,
+            home: <Splash workspaces={workspaces} setWorkspaces={setWorkspaces} equipments={equipments} missions={missions} />,
             mission: <Mission missions={missions} setMissions={setMissions} equipments={equipments} setEquipments={setEquipments} />,
             equipment: <Equipment equipments={equipments} setEquipments={setEquipments} />,
             settings: <Settings workspaces={workspaces} setWorkspaces={setWorkspaces} equipments={equipments} missions={missions} />,
-          }[activeView] || <Splash />
+          }[activeView] || <Splash workspaces={workspaces} setWorkspaces={setWorkspaces} equipments={equipments} missions={missions} />
         }
       </div>
 

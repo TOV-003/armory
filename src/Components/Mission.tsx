@@ -267,7 +267,7 @@ function Mission({ missions, setMissions, equipments, setEquipments }: SettingsP
                     <h4 className="text-2xl font-semibold">Completed Missions</h4>
                     <div className="flex flex-row w-full justify-between">
                         <p className="text-6xl font-bold text-gray-400">
-                            {missions.filter((el) => el.status === "COMPLETED" || el.status === "CANCELLED").length}
+                            {missions.filter(m => m.workspace_id === workspace.workspace_id).filter((el) => el.status === "COMPLETED" || el.status === "CANCELLED").length}
                         </p>
                         <img src={Decommissioned} alt="Logo" />
                     </div>
@@ -371,6 +371,7 @@ function Mission({ missions, setMissions, equipments, setEquipments }: SettingsP
                                             className="flex flex-col gap-2 w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2"
                                         >
                                             <span className="font-medium text-gray-900">{item.name}</span>
+                                            <span className="font-medium text-gray-900">{item.category}</span>
                                             <textarea
                                                 placeholder="Notes"
                                                 className="w-full p-3 rounded-lg text-gray-900 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary"
