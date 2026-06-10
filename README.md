@@ -1,6 +1,7 @@
 # Armory
 
 Armory is a React application built with TypeScript and Vite. It provides a modern development experience with fast hot module replacement (HMR), strict type checking, and a clean ESLint setup tailored for React projects.
+----------
 
 ## Project Overview
 
