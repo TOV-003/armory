@@ -48,9 +48,10 @@ interface EquipmentLog {
 
 function Mission({ missions, setMissions, equipments }: SettingsProps) {
 
-    const { user, workspace, createMission, updateEquipmentState, newEquipmentLog, getEquipmentLogs } = useAuth();
+    const { user, workspace, createMission, updateEquipmentState, newEquipmentLog, getEquipmentLogs, updateMissionStatus } = useAuth();
     const [newMissionModal, setNewMissionModal] = useState<boolean>(false);
     const [addEquipmentModal, setAddEquipmentModal] = useState<boolean>(false);
+    const [missionStatusModal, setMissionStatusModal] = useState<boolean>(false);
     const navigate = useNavigate();
     const [note, setNote] = useState<string>("");
     const [MissionData, setMissionData] = useState({
@@ -72,7 +73,7 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
             }
         }
         fetchEquipmentLogs();
-    }, [user])
+    }, [getEquipmentLogs, user])
 
     useEffect(() => {
         if (!user) {
@@ -108,6 +109,8 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
             setNote("");
         }
     }
+
+
 
 
 
@@ -178,7 +181,7 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
 
                     {missions.filter(el => el.workspace_id === workspace.workspace_id).map((el) => (
                         <>
-                            <p className="text-lg font-semibold w-full col-span-1 text-center">{el.name}</p>
+                            <button className="text-lg font-semibold w-full col-span-1 text-center cursor-pointer hover:bg-white/10 rounded-lg">{el.name}</button>
                             <div className="flex flex-row gap-4 w-full col-span-3">
                                 <p className="text-lg font-semibold w-full text-center">
                                     {new Date(el.start_date).toISOString().split('T')[0]}
@@ -204,36 +207,59 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
                                             >
                                                 <p className="font-semibold text-sm text-gray-700">All Equipment</p>
                                                 <div className="flex flex-col gap-2">
-                                                    {equipments.filter(eq => eq.workspace_id === workspace.workspace_id).filter(item => item.state === "AVAILABLE").map((item) => (
-                                                        <div
-                                                            key={item.id}
-                                                            className="flex items-center justify-between gap-4 w-full bg-white/50 border border-white/70 rounded-lg px-4 py-2"
-                                                        >
-                                                            <span className="font-medium text-gray-800 w-full">{item.name}</span>
-                                                            <textarea
-                                                                placeholder="Notes"
-                                                                className="w-full p-3 rounded-md text-primary bg-secondary border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                                value={note}
-                                                                onChange={(e) => setNote(e.target.value)}
-                                                            />
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => handleAddEquipment(item.id, el.id)}
-                                                                disabled={item.state !== "AVAILABLE"}
-                                                                className="bg-blue-600/70 w-full backdrop-blur-xl hover:bg-blue-600/80 px-3 py-1 text-white text-sm font-semibold rounded-lg cursor-pointer transition duration-200"
+                                                    {equipments.filter(eq => eq.workspace_id === workspace.workspace_id).filter(item => item.state === "AVAILABLE").length > 0 ?
+                                                        equipments.filter(eq => eq.workspace_id === workspace.workspace_id).filter(item => item.state === "AVAILABLE").map((item) => (
+                                                            <div
+                                                                key={item.id}
+                                                                className="flex items-center justify-between gap-4 w-full bg-white/50 border border-white/70 rounded-lg px-4 py-2"
                                                             >
-                                                                Add to Mission
-                                                            </button>
-                                                        </div>
-                                                    ))}
+                                                                <span className="font-medium text-gray-800 w-full">{item.name}</span>
+                                                                <textarea
+                                                                    placeholder="Notes"
+                                                                    className="w-full p-3 rounded-md text-primary bg-secondary border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                                    value={note}
+                                                                    onChange={(e) => setNote(e.target.value)}
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleAddEquipment(item.id, el.id)}
+                                                                    disabled={item.state !== "AVAILABLE"}
+                                                                    className="bg-blue-600/70 w-full backdrop-blur-xl hover:bg-blue-600/80 px-3 py-1 text-white text-sm font-semibold rounded-lg cursor-pointer transition duration-200"
+                                                                >
+                                                                    Add to Mission
+                                                                </button>
+                                                            </div>
+                                                        ))
+                                                        :
+                                                        <div className="text-gray-600">No Equipment Available!</div>
+                                                    }
                                                 </div>
                                             </div>
                                         </div>
                                     )
                                 }
-                                <button className="bg-green-600/70 backdrop-blur-xl hover:bg-green-600/80 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition duration-200">
-                                    Mission Progress
+                                <button className="bg-green-600/70 backdrop-blur-xl hover:bg-green-600/80 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition duration-200" onClick={() => setMissionStatusModal(true)}>
+                                    Change Status
                                 </button>
+                                {
+                                    missionStatusModal && (
+                                        <div
+                                            onClick={() => setMissionStatusModal(false)}
+                                            className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
+                                        >
+                                            <div
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="flex flex-col gap-4 max-w-md w-full border border-white/70 bg-blue-200 p-6 rounded-lg"
+                                            >
+                                                <button onClick={() => {
+                                                    updateMissionStatus(el.id, "CANCELLED");
+
+                                                }} className="bg-red-600/70 backdrop-blur-xl hover:bg-red-600/80 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition duration-200">Cancel Mission</button>
+                                                <button onClick={() => updateMissionStatus(el.id, "COMPLETED")} className="bg-green-600/70 backdrop-blur-xl hover:bg-green-600/80 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition duration-200">Complete Mission</button>
+                                            </div>
+                                        </div>
+                                    )
+                                }
                             </div>
                         </>
                     ))}
