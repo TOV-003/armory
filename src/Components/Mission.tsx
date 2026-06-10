@@ -2,6 +2,7 @@ import Active from "../assets/Active.svg";
 import Decommissioned from "../assets/Decommissioned.svg"
 import { useAuth } from "../context/useAuth";
 import { useState, useEffect } from "react";
+import { Fragment } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -50,8 +51,9 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
 
     const { user, workspace, createMission, updateEquipmentState, newEquipmentLog, getEquipmentLogs, updateMissionStatus } = useAuth();
     const [newMissionModal, setNewMissionModal] = useState<boolean>(false);
-    const [addEquipmentModal, setAddEquipmentModal] = useState<boolean>(false);
-    const [missionStatusModal, setMissionStatusModal] = useState<boolean>(false);
+    const [addEquipmentModal, setAddEquipmentModal] = useState<string | null>(null);
+    const [missionStatusModal, setMissionStatusModal] = useState<string | null>(null);
+    const [equipmentReturnStates, setEquipmentReturnStates] = useState<Record<string, "AVAILABLE" | "DAMAGED" | "DECOMMISSIONED">>({});
     const navigate = useNavigate();
     const [note, setNote] = useState<string>("");
     const [MissionData, setMissionData] = useState({
@@ -105,14 +107,101 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
             const refreshed = await getEquipmentLogs(user?.id || "");
             setEquipmentLogs(refreshed || []);
             toast.success("Equipment added to mission successfully!");
-            setAddEquipmentModal(false);
+            setAddEquipmentModal(null);
             setNote("");
         }
     }
 
+    async function handleRemoveEquipmentMarkAsAvailable(equipmentId: string, missionId: string) {
+        try {
+            await updateEquipmentState(equipmentId, "AVAILABLE");
+            await newEquipmentLog(equipmentId, "RETURN_OK", missionId, note, new Date());
+        }
+        catch (error) {
+            console.error("Error removing equipment mark as available:", error);
+        }
+        finally {
+            const refreshed = await getEquipmentLogs(user?.id || "");
+            setEquipmentLogs(refreshed || []);
+            toast.success("Equipment removed from mission successfully!");
+            setMissionStatusModal(null);
+            setNote("");
+        }
+    }
 
+    async function handleRemoveEquipmentMarkAsDecommissioned(equipmentId: string, missionId: string) {
+        try {
+            await updateEquipmentState(equipmentId, "DECOMMISSIONED");
+            await newEquipmentLog(equipmentId, "RETIRED", missionId, note, new Date());
+        }
+        catch (error) {
+            console.error("Error removing equipment mark as decommissioned:", error);
+        }
+        finally {
+            const refreshed = await getEquipmentLogs(user?.id || "");
+            setEquipmentLogs(refreshed || []);
+            toast.success("Equipment removed from mission successfully!");
+            setMissionStatusModal(null);
+            setNote("");
+        }
+    }
 
+    async function handleRemoveEquipmentMarkAsDamaged(equipmentId: string, missionId: string) {
+        try {
+            await updateEquipmentState(equipmentId, "DAMAGED");
+            await newEquipmentLog(equipmentId, "RETURN_DAMAGED", missionId, note, new Date());
+        }
+        catch (error) {
+            console.error("Error removing equipment mark as damaged:", error);
+        }
+        finally {
+            const refreshed = await getEquipmentLogs(user?.id || "");
+            setEquipmentLogs(refreshed || []);
+            toast.success("Equipment removed from mission successfully!");
+            setMissionStatusModal(null);
+            setNote("");
+        }
+    }
+    async function handleCancelMission(missionId: string) {
+        try {
+            const missionEquipment = equipments
+                .filter(eq => eq.workspace_id === workspace.workspace_id)
+                .filter(item =>
+                    equipmentLogs.some(
+                        log =>
+                            log.equipment_id === item.id &&
+                            log.mission_id === missionId
+                    )
+                );
 
+            await Promise.all(
+                missionEquipment.map(async (item) => {
+                    await updateEquipmentState(item.id, "AVAILABLE");
+                    await newEquipmentLog(
+                        item.id,
+                        "RETURN_OK",
+                        missionId,
+                        "Mission cancelled",
+                        new Date()
+                    );
+                })
+            );
+
+            await updateMissionStatus(missionId, "CANCELLED");
+
+            const refreshed = await getEquipmentLogs(user?.id || "");
+            setEquipmentLogs(refreshed || []);
+
+            toast.success("Mission cancelled and all equipment returned.");
+            setMissionStatusModal(null);
+        } catch (error) {
+            console.error("Error cancelling mission:", error);
+            toast.error("Failed to cancel mission.");
+        }
+    }
+
+    const activeMissionForModal = missionStatusModal ? missions.find(m => m.id === missionStatusModal) : null;
+    const addEquipmentMissionForModal = addEquipmentModal ? missions.find(m => m.id === addEquipmentModal) : null;
 
     return (
         <div className="flex flex-col w-full bg-linear-to-br from-white to-gray-50 md:h-full rounded-2xl p-6 gap-5 items-center justify-center shadow-lg">
@@ -180,7 +269,7 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
                     <p className="text-lg font-semibold col-span-2 text-center">Actions</p>
 
                     {missions.filter(el => el.workspace_id === workspace.workspace_id).map((el) => (
-                        <>
+                        <Fragment key={el.id}>
                             <button className="text-lg font-semibold w-full col-span-1 text-center cursor-pointer hover:bg-gray-100 rounded-lg">{el.name}</button>
                             <div className="flex flex-row gap-4 w-full col-span-3">
                                 <p className="text-lg font-semibold w-full text-center">
@@ -192,81 +281,141 @@ function Mission({ missions, setMissions, equipments }: SettingsProps) {
                                 </p>
                             </div>
                             <div className="flex flex-row gap-2 col-span-2 justify-center">
-                                <button onClick={() => setAddEquipmentModal(true)} className="bg-secondary hover:bg-indigo-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg">
+                                <button
+                                    onClick={() => setAddEquipmentModal(el.id)}
+                                    className="bg-secondary hover:bg-indigo-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg"
+                                >
                                     Add Equipment
                                 </button>
-                                {
-                                    addEquipmentModal && (
-                                        <div
-                                            onClick={() => setAddEquipmentModal(false)}
-                                            className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
-                                        >
-                                            <div
-                                                onClick={(e) => e.stopPropagation()}
-                                                className="flex flex-col gap-4 max-w-md w-full border border-gray-200 bg-white p-6 rounded-2xl shadow-lg"
-                                            >
-                                                <p className="font-semibold text-sm text-gray-900">All Equipment</p>
-                                                <div className="flex flex-col gap-2">
-                                                    {equipments.filter(eq => eq.workspace_id === workspace.workspace_id).filter(item => item.state === "AVAILABLE").length > 0 ?
-                                                        equipments.filter(eq => eq.workspace_id === workspace.workspace_id).filter(item => item.state === "AVAILABLE").map((item) => (
-                                                            <div
-                                                                key={item.id}
-                                                                className="flex items-center justify-between gap-4 w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2"
-                                                            >
-                                                                <span className="font-medium text-gray-900 w-full">{item.name}</span>
-                                                                <textarea
-                                                                    placeholder="Notes"
-                                                                    className="w-full p-3 rounded-lg text-gray-900 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary"
-                                                                    value={note}
-                                                                    onChange={(e) => setNote(e.target.value)}
-                                                                />
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => handleAddEquipment(item.id, el.id)}
-                                                                    disabled={item.state !== "AVAILABLE"}
-                                                                    className="bg-secondary hover:bg-indigo-600 w-full px-3 py-1 text-white text-sm font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg"
-                                                                >
-                                                                    Add to Mission
-                                                                </button>
-                                                            </div>
-                                                        ))
-                                                        :
-                                                        <div className="text-gray-600">No Equipment Available!</div>
-                                                    }
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )
-                                }
-                                <button className="bg-green-500 hover:bg-green-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg" onClick={() => setMissionStatusModal(true)}>
+                                <button
+                                    className="bg-green-500 hover:bg-green-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg"
+                                    onClick={() => setMissionStatusModal(el.id)}
+                                >
                                     Change Status
                                 </button>
-                                {
-                                    missionStatusModal && (
-                                        <div
-                                            onClick={() => setMissionStatusModal(false)}
-                                            className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
-                                        >
-                                            <div
-                                                onClick={(e) => e.stopPropagation()}
-                                                className="flex flex-col gap-4 max-w-md w-full border border-gray-200 bg-white p-6 rounded-2xl shadow-lg"
-                                            >
-                                                <button onClick={() => {
-                                                    updateMissionStatus(el.id, "CANCELLED");
-
-                                                }} className="bg-red-500 hover:bg-red-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg">Cancel Mission</button>
-                                                <button onClick={() => updateMissionStatus(el.id, "COMPLETED")} className="bg-green-500 hover:bg-green-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg">Complete Mission</button>
-                                            </div>
-                                        </div>
-                                    )
-                                }
                             </div>
-                        </>
+                        </Fragment>
                     ))}
                 </div>
-
             </div>
-        </div >
+
+            {addEquipmentModal && addEquipmentMissionForModal && (
+                <div
+                    onClick={() => setAddEquipmentModal(null)}
+                    className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex flex-col gap-4 max-w-md w-full border border-gray-200 bg-white p-6 rounded-2xl shadow-lg"
+                    >
+                        <p className="font-semibold text-sm text-gray-900">All Equipment</p>
+                        <div className="flex flex-col gap-2">
+                            {equipments.filter(eq => eq.workspace_id === workspace.workspace_id).filter(item => item.state === "AVAILABLE").length > 0 ?
+                                equipments.filter(eq => eq.workspace_id === workspace.workspace_id).filter(item => item.state === "AVAILABLE").map((item) => (
+                                    <div
+                                        key={item.id}
+                                        className="flex items-center justify-between gap-4 w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2"
+                                    >
+                                        <span className="font-medium text-gray-900 w-full">{item.name}</span>
+                                        <textarea
+                                            placeholder="Notes"
+                                            className="w-full p-3 rounded-lg text-gray-900 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary"
+                                            value={note}
+                                            onChange={(e) => setNote(e.target.value)}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => handleAddEquipment(item.id, addEquipmentMissionForModal.id)}
+                                            className="bg-secondary hover:bg-indigo-600 w-full px-3 py-1 text-white text-sm font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg"
+                                        >
+                                            Add to Mission
+                                        </button>
+                                    </div>
+                                ))
+                                :
+                                <div className="text-gray-600">No Equipment Available!</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {missionStatusModal && activeMissionForModal && (
+                <div
+                    onClick={() => setMissionStatusModal(null)}
+                    className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex flex-col gap-4 max-w-md w-full border border-gray-200 bg-white p-6 rounded-2xl shadow-lg"
+                    >
+                        <button
+                            onClick={() => handleCancelMission(activeMissionForModal.id)}
+                            className="bg-red-500 hover:bg-red-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg"
+                        >
+                            Cancel Mission
+                        </button>
+                        <div className="flex flex-col gap-2">
+                            {equipments
+                                .filter(eq => eq.workspace_id === workspace.workspace_id)
+                                .filter(item => equipmentLogs.some(log => log.equipment_id === item.id && log.mission_id === activeMissionForModal.id))
+                                .length > 0 ? (
+                                equipments
+                                    .filter(eq => eq.workspace_id === workspace.workspace_id)
+                                    .filter(item => equipmentLogs.some(log => log.equipment_id === item.id && log.mission_id === activeMissionForModal.id))
+                                    .map((item) => (
+                                        <div
+                                            key={item.id}
+                                            className="flex items-center justify-between gap-3 w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2"
+                                        >
+                                            <span className="font-medium text-gray-900 flex-1">{item.name}</span>
+                                            <div className="flex gap-2">
+                                                {(["AVAILABLE", "DAMAGED", "DECOMMISSIONED"] as const).map(state => (
+                                                    <button
+                                                        key={state}
+                                                        type="button"
+                                                        onClick={() => setEquipmentReturnStates(prev => ({ ...prev, [item.id]: state }))}
+                                                        className={`px-2 py-1 rounded-md text-xs font-semibold border transition-all ${equipmentReturnStates[item.id] === state
+                                                            ? state === "AVAILABLE" ? "bg-blue-100 text-blue-700 border-blue-400"
+                                                                : state === "DAMAGED" ? "bg-yellow-100 text-yellow-700 border-yellow-400"
+                                                                    : "bg-gray-200 text-gray-700 border-gray-400"
+                                                            : "bg-white text-gray-400 border-gray-200 hover:border-gray-400"
+                                                            }`}
+                                                    >
+                                                        {state}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))
+                            ) : (
+                                <div className="text-gray-600">No Equipment in this Mission!</div>
+                            )}
+                        </div>
+                        <button
+                            onClick={async () => {
+                                const missionEquipment = equipments
+                                    .filter(eq => eq.workspace_id === workspace.workspace_id)
+                                    .filter(item => equipmentLogs.some(log => log.equipment_id === item.id && log.mission_id === activeMissionForModal.id));
+
+                                await Promise.all(missionEquipment.map(item => {
+                                    const state = equipmentReturnStates[item.id] ?? "AVAILABLE";
+                                    if (state === "AVAILABLE") return handleRemoveEquipmentMarkAsAvailable(item.id, activeMissionForModal.id);
+                                    if (state === "DAMAGED") return handleRemoveEquipmentMarkAsDamaged(item.id, activeMissionForModal.id);
+                                    if (state === "DECOMMISSIONED") return handleRemoveEquipmentMarkAsDecommissioned(item.id, activeMissionForModal.id);
+                                }));
+
+                                await updateMissionStatus(activeMissionForModal.id, "COMPLETED");
+                                setMissionStatusModal(null);
+                            }}
+                            className="bg-green-500 hover:bg-green-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg"
+                        >
+                            Complete Mission
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
     )
 }
 

@@ -243,28 +243,25 @@ function Equipment({ equipments, setEquipments }: SettingsProps) {
                                             <td className="px-4 py-3 text-gray-600 font-mono text-sm hidden md:block">{el.serial_number}</td>
                                             <td className="px-4 py-3 relative">
                                                 <button
-                                                    onClick={() => setStateModalId(stateModalId === el.id ? null : el.id)}
-                                                    className={`px-2 py-1 rounded-md text-xs font-semibold cursor-pointer transition-opacity hover:opacity-80 shadow-sm ${el.state === "AVAILABLE" ? "bg-blue-100 text-blue-700 border border-blue-300" :
-                                                        el.state === "IN_USE" ? "bg-green-100 text-green-700 border border-green-300" :
-                                                            el.state === "DAMAGED" ? "bg-yellow-100 text-yellow-700 border border-yellow-300" :
-                                                                el.state === "DECOMMISSIONED" ? "bg-gray-100 text-gray-700 border border-gray-300" :
-                                                                    "hidden"
+                                                    onClick={el.state === "DAMAGED" ? () => setStateModalId(stateModalId === el.id ? null : el.id) : undefined}
+                                                    className={`px-2 py-1 rounded-md text-xs font-semibold transition-opacity shadow-sm ${el.state === "DAMAGED" ? "cursor-pointer hover:opacity-80" : "cursor-default"
+                                                        } ${el.state === "AVAILABLE" ? "bg-blue-100 text-blue-700 border border-blue-300" :
+                                                            el.state === "IN_USE" ? "bg-green-100 text-green-700 border border-green-300" :
+                                                                el.state === "DAMAGED" ? "bg-yellow-100 text-yellow-700 border border-yellow-300" :
+                                                                    el.state === "DECOMMISSIONED" ? "bg-gray-100 text-gray-700 border border-gray-300" :
+                                                                        "hidden"
                                                         }`}
                                                 >
                                                     {el.state}
                                                 </button>
                                                 {stateModalId === el.id && (
                                                     <div className="absolute z-50 left-0 bottom-full mt-1 w-48 bg-white border border-gray-300 rounded-lg shadow-xl overflow-hidden">
-                                                        {(["AVAILABLE", "IN_USE", "DAMAGED", "DECOMMISSIONED"] as const).map(state => (
+                                                        {(["AVAILABLE", "DECOMMISSIONED"] as const).map(state => (
                                                             <button
                                                                 key={state}
                                                                 onClick={() => handleUpdateState(el.id, state)}
                                                                 className={`w-full text-left px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-gray-100 ${el.state === state ? "opacity-40 cursor-default" : "cursor-pointer"
-                                                                    } ${state === "AVAILABLE" ? "text-blue-700" :
-                                                                        state === "IN_USE" ? "text-green-700" :
-                                                                            state === "DAMAGED" ? "text-yellow-700" :
-                                                                                "text-gray-700"
-                                                                    }`}
+                                                                    } ${state === "AVAILABLE" ? "text-blue-700" : "text-gray-700"}`}
                                                                 disabled={el.state === state}
                                                             >
                                                                 {state}
