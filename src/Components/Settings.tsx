@@ -40,7 +40,7 @@ interface SettingsProps {
 }
 
 export default function Settings({ workspaces, setWorkspaces, equipments, missions }: SettingsProps) {
-    const { user, logout, loading, workspace, setWorkspace, createWorkspace, deleteWorkspace, getWorkspaces, setLastActiveWorkspace, updateUser } = useAuth(); const navigate = useNavigate();
+    const { user, logout, loading, workspace, setWorkspace, createWorkspace, deleteWorkspace, getWorkspaces, setLastActiveWorkspace, updateUser, deleteMyAccount } = useAuth(); const navigate = useNavigate();
     const [newWorkspaceModal, setNewWorkspaceModal] = useState<boolean>(false);
     const [deleteWorkspaceModal, setDeleteWorkspaceModal] = useState<boolean>(false);
     const [editAccountModal, setEditAccountModal] = useState<boolean>(false);
@@ -109,6 +109,12 @@ export default function Settings({ workspaces, setWorkspaces, equipments, missio
     async function handleLogout() {
         toast.success("Logged out!");
         await logout();
+        navigate('/');
+    }
+
+    async function handleDeleteAccount() {
+        await deleteMyAccount();
+        toast.success("Account deleted!");
         navigate('/');
     }
 
@@ -305,7 +311,7 @@ export default function Settings({ workspaces, setWorkspaces, equipments, missio
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" /><path d="M9 12h12l-3 -3m0 6l3 -3" /></svg>
                     Logout
                 </button>
-                <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-red-500/10 text-red-600 border border-red-500/30 text-sm font-medium transition-all duration-150 hover:opacity-85 active:scale-[0.97] cursor-pointer shadow-md hover:shadow-lg">
+                <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-red-500/10 text-red-600 border border-red-500/30 text-sm font-medium transition-all duration-150 hover:opacity-85 active:scale-[0.97] cursor-pointer shadow-md hover:shadow-lg" onClick={handleDeleteAccount}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
                     Delete Account
                 </button>
