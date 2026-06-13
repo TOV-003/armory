@@ -111,7 +111,7 @@ function Splash({ workspaces, equipments, missions }: SettingsProps) {
         zip.file('info.json', JSON.stringify({ exported_at: new Date().toISOString() }, null, 2));
 
         const content = await zip.generateAsync({ type: 'blob' });
-        saveAs(content, `my_supabase_data_${Date.now()}.zip`);
+        saveAs(content, `my_local_backup_data_${Date.now()}.zip`);
     }
 
     return (
