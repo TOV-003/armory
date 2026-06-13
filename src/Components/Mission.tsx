@@ -248,7 +248,7 @@ function Mission({ missions, setMissions, equipments, setEquipments }: SettingsP
             <div className="flex flex-col items-center md:grid md:grid-cols-2 lg:flex-row lg:flex justify-between w-full gap-4 font-inter">
                 <div
                     onClick={() => setViewMode("active")}
-                    className={`min-h-40 w-full font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border border-secondary/30 transition-all cursor-pointer shadow-lg hover:shadow-xl ${viewMode === "active" ? "ring-2 ring-secondary/30" : ""
+                    className={`min-h-40 h-full w-full font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border border-secondary/30 transition-all cursor-pointer shadow-lg hover:shadow-xl ${viewMode === "active" ? "ring-2 ring-secondary/30" : ""
                         }`}
                 >
                     <h4 className="text-2xl font-semibold">Active Missions</h4>
@@ -262,7 +262,7 @@ function Mission({ missions, setMissions, equipments, setEquipments }: SettingsP
 
                 <div
                     onClick={() => setViewMode("completed")}
-                    className={`min-h-40 w-full font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border border-gray-400/30 transition-all cursor-pointer shadow-lg hover:shadow-xl ${viewMode === "completed" ? "ring-2 ring-gray-400/30" : ""
+                    className={`min-h-40 h-full w-full font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border border-gray-400/30 transition-all cursor-pointer shadow-lg hover:shadow-xl ${viewMode === "completed" ? "ring-2 ring-gray-400/30" : ""
                         }`}
                 >
                     <h4 className="text-2xl font-semibold">Completed Missions</h4>

@@ -7,6 +7,7 @@ import Settings from "../assets/Settings.svg";
 import type { ViewType } from "../pages/Dashboard";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
+import LetterAvatar from "./LetterAvatar";
 
 interface SidebarProps {
   activeView: ViewType;
@@ -56,7 +57,12 @@ function Sidebar({ activeView, setActiveView }: SidebarProps) {
             </button>
           </div>
           <button className={`flex mt-auto gap-2 items-center px-7 py-5 w-full rounded-lg text-gray-700 hover:bg-gray-100 transition-all`}>
-            <img src={Equipment} alt="Logo" />
+            <LetterAvatar
+              letter={user?.user_metadata.name?.toUpperCase()}
+              size="w-16 h-10"
+              bgColor="bg-blue-500"
+              textColor="text-white"
+            />
             <h2 className="font-extralight">{user?.user_metadata.name || "Account"}</h2>
           </button>
         </div>
@@ -108,9 +114,14 @@ function Sidebar({ activeView, setActiveView }: SidebarProps) {
       </div>
 
       <button
-        className={`flex mt-auto gap-2 items-center px-7 py-5 w-full rounded-lg text-gray-700 hover:bg-gray-100 transition-all mb-6`}
+        className={`flex flex-col mt-auto gap-2 items-center px-7 py-5 w-full rounded-lg text-gray-700 hover:bg-gray-100 transition-all mb-6`}
       >
-        <img src={Equipment} alt="Logo" />
+        <LetterAvatar
+          letter={user?.user_metadata.name?.toUpperCase()}
+          size="w-16 h-16"
+          bgColor="bg-blue-500"
+          textColor="text-white"
+        />
         <h2 className="font-extralight">{user?.user_metadata.name || "Account"}</h2>
       </button>
     </div>
