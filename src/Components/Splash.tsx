@@ -38,13 +38,12 @@ interface Missions {
 
 interface SettingsProps {
     workspaces: Workspace[];
-    setWorkspaces: React.Dispatch<React.SetStateAction<Workspace[]>>;
     equipments: Equipment[];
     missions: Missions[];
 }
 
 
-function Splash({ workspaces, setWorkspaces, equipments, missions }: SettingsProps) {
+function Splash({ workspaces, equipments, missions }: SettingsProps) {
     const { user, workspace } = useAuth();
     const navigate = useNavigate();
     console.log(workspaces);
@@ -102,7 +101,31 @@ function Splash({ workspaces, setWorkspaces, equipments, missions }: SettingsPro
                 </div>
             </div>
             <div className="flex flex-col lg:grid lg:grid-cols-8 items-center justify-center w-full gap-4 h-full">
-                <div className="col-span-5 bg-white h-full rounded-2xl p-6 w-full shadow-lg">g</div>
+                <div className="col-span-5 bg-white h-full rounded-2xl p-6 w-full shadow-lg flex flex-col overflow-y-auto">
+                    <h2 className="text-2xl font-semibold">Active Missions</h2>
+                    <div className="overflow-x-auto w-full">
+                        <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm">
+                            <thead className="bg-gray-100 border-b border-gray-200">
+                                <tr>
+                                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Mission Name</th>
+                                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Start Date</th>
+                                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {missions.map((el) => (
+                                    <tr key={el.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                                        <td className="px-4 py-3 text-base font-medium text-gray-900">{el.name}</td>
+                                        <td className="px-4 py-3 text-base text-gray-700">
+                                            {new Date(el.start_date).toISOString().split("T")[0]}
+                                        </td>
+                                        <td className="px-4 py-3 text-base text-gray-700">{el.status}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                 <div className="col-span-3 flex flex-col items-center w-full h-full gap-4">
                     <div className="flex-2 w-full bg-white rounded-2xl p-4 shadow-lg">g</div>
                     <div className="flex-1 w-full bg-white rounded-2xl p-4 shadow-lg">g</div>
