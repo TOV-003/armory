@@ -167,7 +167,7 @@ function Splash({ workspaces, equipments, missions }: SettingsProps) {
                         <h2 className="text-2xl font-semibold mb-3">Recent State Updates</h2>
                         <div className="w-full">
                             <div className="flex flex-col gap-0">
-                                {equipmentLogs.map((el, index) => {
+                                {equipmentLogs.reverse().map((el, index) => {
                                     const timeStr = new Date(el.timestamp).toTimeString().slice(0, 5);
                                     const isLast = index === equipmentLogs.length - 1;
 
