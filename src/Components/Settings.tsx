@@ -160,7 +160,7 @@ export default function Settings({ workspaces, setWorkspaces, equipments, missio
     }
 
     return (
-        <div className="flex flex-col w-full bg-linear-to-br from-white to-gray-50 md:h-full rounded-2xl p-6 gap-5 items-center justify-start shadow-lg">
+        <div className="flex flex-col w-full bg-linear-to-br from-white to-gray-50 md:h-full rounded-2xl p-6 gap-5 items-center justify-start shadow-lg overflow-y-auto">
             <div className="flex flex-col items-center md:flex-row justify-between w-full gap-4 md:gap-0">
                 <h1 className="text-gray-900 font-normal md:text-2xl md:text-start text-center text-xl">Settings</h1>
                 <div className="flex gap-4 items-center justify-center">
@@ -192,7 +192,7 @@ export default function Settings({ workspaces, setWorkspaces, equipments, missio
                             <div className="w-full">
                                 <h4 className="text-sm font-medium text-gray-500 mb-1">Missions</h4>
                                 <div className="flex flex-row w-full justify-between items-center bg-secondary/5 p-3 rounded-xl">
-                                    <p className="text-2xl font-bold text-secondary">12</p>
+                                    <p className="text-2xl font-bold text-secondary">{missions.filter(m => m.workspace_id === el.id).length}</p>
                                 </div>
                             </div>
 
