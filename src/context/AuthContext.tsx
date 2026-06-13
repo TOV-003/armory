@@ -89,6 +89,18 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
         return data;
     }, []);
 
+    const updateUser = useCallback(async (name: string, phone: string): Promise<boolean> => {
+        const { error } = await supabase.auth.updateUser({
+            data: { name, phone },
+        });
+        if (error) throw error;
+
+        const { data } = await supabase.auth.getUser();
+        setUser(data.user);
+
+        return true;
+    }, []);
+
     const deleteMyAccount = useCallback(async (): Promise<boolean> => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) throw new Error('No active user session found.');
@@ -249,7 +261,8 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
         createMission,
         newEquipmentLog,
         updateMissionStatus,
-        getEquipmentLogs
+        getEquipmentLogs,
+        updateUser
     }), [
         user,
         loading,
@@ -270,7 +283,8 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
         createMission,
         newEquipmentLog,
         updateMissionStatus,
-        getEquipmentLogs
+        getEquipmentLogs,
+        updateUser
     ]);
 
     return (

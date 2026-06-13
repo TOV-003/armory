@@ -40,10 +40,11 @@ interface SettingsProps {
 }
 
 export default function Settings({ workspaces, setWorkspaces, equipments, missions }: SettingsProps) {
-    const { user, logout, loading, workspace, setWorkspace, createWorkspace, deleteWorkspace, getWorkspaces, setLastActiveWorkspace } = useAuth();
-    const navigate = useNavigate();
+    const { user, logout, loading, workspace, setWorkspace, createWorkspace, deleteWorkspace, getWorkspaces, setLastActiveWorkspace, updateUser } = useAuth(); const navigate = useNavigate();
     const [newWorkspaceModal, setNewWorkspaceModal] = useState<boolean>(false);
     const [deleteWorkspaceModal, setDeleteWorkspaceModal] = useState<boolean>(false);
+    const [editAccountModal, setEditAccountModal] = useState<boolean>(false);
+    const [editLoading, setEditLoading] = useState<boolean>(false);
     const [workSpaceData, setWorkSpaceData] = useState({
         name: "",
         description: "",
@@ -55,7 +56,7 @@ export default function Settings({ workspaces, setWorkspaces, equipments, missio
         }
     }, [user, navigate, workspace]);
 
-    async function handleCreateWorkspace(e: React.FormEvent<HTMLFormElement>) {
+    async function handleCreateWorkspace(e: React.SyntheticEvent<HTMLFormElement>) {
         e.preventDefault();
         await createWorkspace(workSpaceData.name, workSpaceData.description);
         const updated = await getWorkspaces();
@@ -82,6 +83,26 @@ export default function Settings({ workspaces, setWorkspaces, equipments, missio
             console.log("Selected workspace:", workspaceId);
             setNewWorkspaceModal(false);
             setDeleteWorkspaceModal(false);
+        }
+    }
+
+    async function handleEditAccount(e: React.SyntheticEvent<HTMLFormElement>) {
+        e.preventDefault();
+        setEditLoading(true);
+
+        const formData = new FormData(e.currentTarget);
+        const name = formData.get("name") as string;
+        const phone = formData.get("phone") as string;
+
+        try {
+            await updateUser(name, phone);
+            toast.success("Account updated successfully!");
+            setEditAccountModal(false);
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Something went wrong");
+        }
+        finally {
+            setEditLoading(false);
         }
     }
 
@@ -261,15 +282,19 @@ export default function Settings({ workspaces, setWorkspaces, equipments, missio
             <div className="flex flex-col items-center md:items-start justify-between w-full gap-4 text-gray-700">
                 <h1 className="text-gray-900 font-normal md:text-2xl md:text-start text-center text-xl">Account Info:</h1>
                 <div className="flex flex-wrap gap-4 items-center justify-start w-full text-gray-600">
-                    <p>Username: admin</p>
+                    <p>Name: {user?.user_metadata?.name ?? "Not set"}</p>
                     <p>Email: {user?.email}</p>
+                    <p>Phone: {user?.user_metadata?.phone ?? "Not set"}</p>
                     <p>Total Missions Created: {missions.filter(el => el.user_id === user?.id).length}</p>
                     <p>Total Equipments: {equipments.filter(el => el.user_id === user?.id).length}</p>
                 </div>
             </div>
 
             <div className="flex items-center gap-2.5 flex-wrap">
-                <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-secondary/10 text-secondary border border-secondary/30 text-sm font-medium transition-all duration-150 hover:opacity-85 active:scale-[0.97] cursor-pointer shadow-md hover:shadow-lg">
+                <button
+                    onClick={() => setEditAccountModal(true)}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-secondary/10 text-secondary border border-secondary/30 text-sm font-medium transition-all duration-150 hover:opacity-85 active:scale-[0.97] cursor-pointer shadow-md hover:shadow-lg"
+                >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" /><path d="M16 5l3 3" /></svg>
                     Edit Account
                 </button>
@@ -285,6 +310,60 @@ export default function Settings({ workspaces, setWorkspaces, equipments, missio
                     Delete Account
                 </button>
             </div>
+
+            {editAccountModal && (
+                <div
+                    onClick={() => setEditAccountModal(false)}
+                    className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
+                >
+                    <form
+                        onSubmit={handleEditAccount}
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex flex-col gap-4 max-w-md w-full border border-gray-200 bg-white p-6 rounded-2xl shadow-lg"
+                    >
+                        <h2 className="text-lg font-semibold text-gray-900">Edit Account</h2>
+
+                        <label className="text-gray-700 font-medium text-sm">
+                            Name
+                            <input
+                                name="name"
+                                type="text"
+                                placeholder="Your name"
+                                defaultValue={user?.user_metadata?.name ?? ""}
+                                className="w-full p-3 rounded-lg text-gray-900 bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary mt-1 font-normal"
+                            />
+                        </label>
+
+                        <label className="text-gray-700 font-medium text-sm">
+                            Phone
+                            <input
+                                name="phone"
+                                type="tel"
+                                placeholder="Your phone number"
+                                defaultValue={user?.user_metadata?.phone ?? ""}
+                                className="w-full p-3 rounded-lg text-gray-900 bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary mt-1 font-normal"
+                            />
+                        </label>
+
+                        <div className="flex gap-3 mt-2">
+                            <button
+                                type="button"
+                                onClick={() => setEditAccountModal(false)}
+                                className="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium text-sm hover:bg-gray-50 transition-all cursor-pointer"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={editLoading}
+                                className="flex-1 bg-secondary hover:bg-indigo-600 px-4 py-2 text-white font-semibold rounded-lg cursor-pointer transition duration-200 shadow-md hover:shadow-lg disabled:opacity-50"
+                            >
+                                {editLoading ? "Saving..." : "Save Changes"}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
         </div>
     );
 }

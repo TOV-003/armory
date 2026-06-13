@@ -3,7 +3,7 @@ import Available from "../assets/Available.svg";
 import Damaged from "../assets/Damaged.svg";
 import Decommissioned from "../assets/Decommissioned.svg"
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState, type JSX } from "react";
 import { useAuth } from "../context/useAuth";
 
 
@@ -42,17 +42,42 @@ interface SettingsProps {
     missions: Missions[];
 }
 
+interface EquipmentLog {
+    id: string;
+    equipment_id: string;
+    action_type: string;
+    user_id: string;
+    workspace_id: string;
+    mission_id: string;
+    notes: string | null;
+    timestamp: Date;
+}
+
 
 function Splash({ workspaces, equipments, missions }: SettingsProps) {
-    const { user, workspace } = useAuth();
+    const { user, workspace, getEquipmentLogs } = useAuth();
     const navigate = useNavigate();
+    const [equipmentLogs, setEquipmentLogs] = useState<EquipmentLog[]>([]);
     console.log(workspaces);
+
 
 
     useEffect(() => {
         if (!user) {
             navigate('/login');
         }
+
+        async function fetchEquipmentLogs() {
+            console.log("fetching equipment logs");
+            console.log(user?.user_metadata);
+            try {
+                const fetchedData = await getEquipmentLogs(user?.id || "");
+                setEquipmentLogs(fetchedData || []);
+            } catch (error) {
+                console.error("Error fetching equipment logs:", error);
+            }
+        }
+        fetchEquipmentLogs();
     }, [user, navigate]);
 
     return (
@@ -138,8 +163,90 @@ function Splash({ workspaces, equipments, missions }: SettingsProps) {
                     </div>
                 </div>
                 <div className="col-span-3 flex flex-col items-center w-full h-full gap-4">
-                    <div className="flex-2 w-full bg-white rounded-2xl p-4 shadow-lg">g</div>
-                    <div className="flex-1 w-full bg-white rounded-2xl p-4 shadow-lg">g</div>
+                    <div className=" max-h-60 w-full bg-white rounded-2xl p-4 shadow-lg flex flex-col overflow-y-auto ">
+                        <h2 className="text-2xl font-semibold mb-3">Recent State Updates</h2>
+                        <div className="w-full">
+                            <div className="flex flex-col gap-0">
+                                {equipmentLogs.map((el, index) => {
+                                    const timeStr = new Date(el.timestamp).toTimeString().slice(0, 5);
+                                    const isLast = index === equipmentLogs.length - 1;
+
+                                    const statusConfig: Record<string, { color: string; message: JSX.Element }> = {
+                                        CHECKOUT: {
+                                            color: "text-blue-600",
+                                            message: (
+                                                <>
+                                                    Asset <span className="font-medium text-gray-900">{el.equipment_id}</span> was{" "}
+                                                    <span className="font-bold text-blue-600">checked out</span>.
+                                                </>
+                                            ),
+                                        },
+                                        RETURN_OK: {
+                                            color: "text-green-600",
+                                            message: (
+                                                <>
+                                                    Asset <span className="font-medium text-gray-900">{el.equipment_id}</span> was{" "}
+                                                    <span className="font-bold text-green-600">returned in good condition</span>.
+                                                </>
+                                            ),
+                                        },
+                                        RETURN_DAMAGED: {
+                                            color: "text-orange-500",
+                                            message: (
+                                                <>
+                                                    Asset <span className="font-medium text-gray-900">{el.equipment_id}</span> was{" "}
+                                                    <span className="font-bold text-orange-500">returned damaged</span>.
+                                                </>
+                                            ),
+                                        },
+                                        REPAIR_COMPLETE: {
+                                            color: "text-purple-600",
+                                            message: (
+                                                <>
+                                                    Asset <span className="font-medium text-gray-900">{el.equipment_id}</span> has been{" "}
+                                                    <span className="font-bold text-purple-600">repaired and is ready for use</span>.
+                                                </>
+                                            ),
+                                        },
+                                        RETIRE: {
+                                            color: "text-red-500",
+                                            message: (
+                                                <>
+                                                    Asset <span className="font-medium text-gray-900">{el.equipment_id}</span> has been{" "}
+                                                    <span className="font-bold text-red-500">retired from service</span>.
+                                                </>
+                                            ),
+                                        },
+                                    };
+
+                                    const config = statusConfig[el.action_type] ?? {
+                                        color: "text-gray-500",
+                                        message: (
+                                            <>
+                                                Asset <span className="font-medium text-gray-900">{el.equipment_id}</span> status changed to{" "}
+                                                <span className="font-bold text-gray-500">{el.action_type}</span>.
+                                            </>
+                                        ),
+                                    };
+
+                                    return (
+                                        <div key={el.id} className="flex gap-3">
+                                            <div className="flex flex-col items-center">
+                                                <div className={`w-2.5 h-2.5 rounded-full mt-1 shrink-0 ${config.color.replace("text-", "bg-")}`} />
+                                                {!isLast && <div className="w-px flex-1 bg-gray-200 my-0.5" />}
+                                            </div>
+
+                                            <p className="text-sm text-gray-700 pb-3 leading-snug">
+                                                <span className="text-gray-500">[{timeStr}]</span>{" "}
+                                                {config.message}
+                                            </p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="h-full w-full bg-white rounded-2xl p-4 shadow-lg">g</div>
                 </div>
             </div>
         </div >
