@@ -6,6 +6,9 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState, type JSX } from "react";
 import { useAuth } from "../context/useAuth";
 import FleetUtilisationRate from "./FleetUtilisationRate";
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
+import { supabase } from '../api/SupabaseClient';
 
 
 interface Workspace {
@@ -81,6 +84,36 @@ function Splash({ workspaces, equipments, missions }: SettingsProps) {
         fetchEquipmentLogs();
     }, [user, navigate]);
 
+    function arrayToCSV(data: Record<string, unknown>[]): string {
+        if (!data.length) return '';
+        const headers = Object.keys(data[0]);
+        const rows = data.map(row =>
+            headers.map(header => JSON.stringify(row[header] ?? '')).join(',')
+        );
+        return [headers.join(','), ...rows].join('\n');
+    }
+
+    async function exportAllMyDataToZip() {
+        const [equipment, missions, workspaces, equipmentLog] = await Promise.all([
+            supabase.from('equipment').select('*'),
+            supabase.from('missions').select('*'),
+            supabase.from('workspaces').select('*'),
+            supabase.from('equipment_log').select('*')
+        ]);
+
+        const zip = new JSZip();
+
+        if (equipment.data?.length) zip.file('equipment.csv', arrayToCSV(equipment.data));
+        if (missions.data?.length) zip.file('missions.csv', arrayToCSV(missions.data));
+        if (workspaces.data?.length) zip.file('workspaces.csv', arrayToCSV(workspaces.data));
+        if (equipmentLog.data?.length) zip.file('equipment_log.csv', arrayToCSV(equipmentLog.data));
+
+        zip.file('info.json', JSON.stringify({ exported_at: new Date().toISOString() }, null, 2));
+
+        const content = await zip.generateAsync({ type: 'blob' });
+        saveAs(content, `my_supabase_data_${Date.now()}.zip`);
+    }
+
     return (
         <div className="flex flex-col w-full bg-linear-to-br from-white to-gray-50 md:h-full rounded-2xl p-6 gap-5 items-center justify-start shadow-lg overflow-y-auto">
             <div className="flex flex-col items-center md:flex-row justify-between w-full gap-4 md:gap-0">
@@ -89,7 +122,7 @@ function Splash({ workspaces, equipments, missions }: SettingsProps) {
                 <h2>{workspace.workspace_name}</h2>
 
                 <div className="flex gap-4 items-center justify-center">
-                    <button className="text-base font-inter px-6 py-2 rounded-lg bg-secondary hover:bg-indigo-600 text-white font-bold cursor-pointer shadow-lg hover:shadow-xl transition-all">Local Backup</button>
+                    <button className="text-base font-inter px-6 py-2 rounded-lg bg-secondary hover:bg-indigo-600 text-white font-bold cursor-pointer shadow-lg hover:shadow-xl transition-all" onClick={exportAllMyDataToZip}>Local Backup</button>
                 </div>
             </div>
             <div className="flex flex-col items-center md:grid md:grid-cols-2 lg:flex-row lg:flex  justify-between w-full gap-4 font-inter">
