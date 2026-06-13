@@ -5,6 +5,7 @@ import Decommissioned from "../assets/Decommissioned.svg"
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, type JSX } from "react";
 import { useAuth } from "../context/useAuth";
+import FleetUtilisationRate from "./FleetUtilisationRate";
 
 
 interface Workspace {
@@ -69,7 +70,7 @@ function Splash({ workspaces, equipments, missions }: SettingsProps) {
 
         async function fetchEquipmentLogs() {
             console.log("fetching equipment logs");
-            console.log(user?.user_metadata);
+
             try {
                 const fetchedData = await getEquipmentLogs(user?.id || "");
                 setEquipmentLogs(fetchedData || []);
@@ -81,7 +82,7 @@ function Splash({ workspaces, equipments, missions }: SettingsProps) {
     }, [user, navigate]);
 
     return (
-        <div className="flex flex-col w-full bg-linear-to-br from-white to-gray-50 md:h-full rounded-2xl p-6 gap-5 items-center justify-center shadow-lg">
+        <div className="flex flex-col w-full bg-linear-to-br from-white to-gray-50 md:h-full rounded-2xl p-6 gap-5 items-center justify-start shadow-lg overflow-y-auto">
             <div className="flex flex-col items-center md:flex-row justify-between w-full gap-4 md:gap-0">
                 <h1 className="text-gray-900 font-normal md:text-3xl md:text-start text-center text-xl">Hi, here's whats happening <br></br>
                     with your inventory </h1>
@@ -246,7 +247,14 @@ function Splash({ workspaces, equipments, missions }: SettingsProps) {
                             </div>
                         </div>
                     </div>
-                    <div className="h-full w-full bg-white rounded-2xl p-4 shadow-lg">g</div>
+                    <div className="h-full w-full bg-white rounded-2xl p-4 shadow-lg">
+                        <FleetUtilisationRate
+                            numerator={equipments.filter(el => el.workspace_id === workspace.workspace_id && el.state === "IN_USE").length}
+                            denominator={equipments.filter(el => el.workspace_id === workspace.workspace_id).length}
+                            title="Equipment UtiliSation"
+                            utilizationLabel="UTILISED"
+                        />
+                    </div>
                 </div>
             </div>
         </div >
