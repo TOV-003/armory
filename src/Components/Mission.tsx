@@ -248,24 +248,25 @@ function Mission({ missions, setMissions, equipments, setEquipments }: SettingsP
             <div className="flex flex-col items-center md:grid md:grid-cols-2 lg:flex-row lg:flex justify-between w-full gap-4 font-inter">
                 <div
                     onClick={() => setViewMode("active")}
-                    className={`h-40 w-full font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border-l-8 transition-all cursor-pointer shadow-lg hover:shadow-xl ${viewMode === "active" ? "border-secondary ring-2 ring-secondary/30" : "border-secondary"
+                    className={`min-h-40 w-full font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border border-secondary/30 transition-all cursor-pointer shadow-lg hover:shadow-xl ${viewMode === "active" ? "ring-2 ring-secondary/30" : ""
                         }`}
                 >
                     <h4 className="text-2xl font-semibold">Active Missions</h4>
-                    <div className="flex flex-row w-full justify-between">
+                    <div className="flex flex-row w-full justify-between items-center bg-secondary/5 p-3 rounded-xl mb-2">
                         <p className="text-6xl font-bold text-secondary">
                             {missions.filter((el) => el.workspace_id === workspace.workspace_id && el.status === "ACTIVE").length}
                         </p>
                         <img src={Active} alt="Logo" />
                     </div>
                 </div>
+
                 <div
                     onClick={() => setViewMode("completed")}
-                    className={`h-40 w-full font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border-l-8 transition-all cursor-pointer shadow-lg hover:shadow-xl ${viewMode === "completed" ? "border-gray-600 ring-2 ring-gray-400/30" : "border-gray-400"
+                    className={`min-h-40 w-full font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border border-gray-400/30 transition-all cursor-pointer shadow-lg hover:shadow-xl ${viewMode === "completed" ? "ring-2 ring-gray-400/30" : ""
                         }`}
                 >
                     <h4 className="text-2xl font-semibold">Completed Missions</h4>
-                    <div className="flex flex-row w-full justify-between">
+                    <div className="flex flex-row w-full justify-between items-center bg-gray-400/5 p-3 rounded-xl mb-2">
                         <p className="text-6xl font-bold text-gray-400">
                             {missions.filter(m => m.workspace_id === workspace.workspace_id).filter((el) => el.status === "COMPLETED" || el.status === "CANCELLED").length}
                         </p>

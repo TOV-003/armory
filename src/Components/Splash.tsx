@@ -67,37 +67,48 @@ function Splash({ workspaces, equipments, missions }: SettingsProps) {
                 </div>
             </div>
             <div className="flex flex-col items-center md:grid md:grid-cols-2 lg:flex-row lg:flex  justify-between w-full gap-4 font-inter">
-                <div className="h-60 w-full  font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border-l-8 border-secondary text-gray-900 shadow-lg hover:shadow-xl transition-shadow">
+                <div className="h-60 w-full font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border border-secondary/30 shadow-lg hover:shadow-xl transition-shadow">
                     <h4 className="text-2xl font-semibold">Active in Field</h4>
-                    <div className="flex flex-row w-full justify-between">
-                        <p className="text-6xl font-bold text-secondary">{equipments.filter(el => el.workspace_id === workspace.workspace_id && el.state === "IN_USE").length}</p>
+                    <div className="flex flex-row w-full justify-between items-center bg-secondary/5 p-3 rounded-xl">
+                        <p className="text-6xl font-bold text-secondary">
+                            {equipments.filter(el => el.workspace_id === workspace.workspace_id && el.state === "IN_USE").length}
+                        </p>
                         <img src={Active} alt="Logo" />
                     </div>
-                    <h4 className="text-xl text-gray-600">Deployed on Missions</h4>
+                    <h4 className="text-base text-gray-600">Deployed on Missions</h4>
                 </div>
-                <div className="h-60 w-full  font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border-l-8 border-green-500 text-gray-900 shadow-lg hover:shadow-xl transition-shadow">
+
+                <div className="h-60 w-full font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border border-green-500/30 text-gray-900 shadow-lg hover:shadow-xl transition-shadow">
                     <h4 className="text-2xl font-semibold">Available</h4>
-                    <div className="flex flex-row w-full justify-between">
-                        <p className="text-6xl font-bold text-green-500">{equipments.filter(el => el.workspace_id === workspace.workspace_id && el.state === "AVAILABLE").length}</p>
+                    <div className="flex flex-row w-full justify-between items-center bg-green-500/5 p-3 rounded-xl">
+                        <p className="text-6xl font-bold text-green-500">
+                            {equipments.filter(el => el.workspace_id === workspace.workspace_id && el.state === "AVAILABLE").length}
+                        </p>
                         <img src={Available} alt="Logo" />
                     </div>
-                    <h4 className="text-xl text-gray-600">Ready for Deployment</h4>
+                    <h4 className="text-base text-gray-600">Ready for Deployment</h4>
                 </div>
-                <div className="h-60 w-full  font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border-l-8 border-warning text-gray-900 shadow-lg hover:shadow-xl transition-shadow">
+
+                <div className="h-60 w-full font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border border-warning/30 text-gray-900 shadow-lg hover:shadow-xl transition-shadow">
                     <h4 className="text-2xl font-semibold">Damaged</h4>
-                    <div className="flex flex-row w-full justify-between">
-                        <p className="text-6xl font-bold text-warning">{equipments.filter(el => el.workspace_id === workspace.workspace_id && el.state === "DAMAGED").length}</p>
+                    <div className="flex flex-row w-full justify-between items-center bg-warning/5 p-3 rounded-xl">
+                        <p className="text-6xl font-bold text-warning">
+                            {equipments.filter(el => el.workspace_id === workspace.workspace_id && el.state === "DAMAGED").length}
+                        </p>
                         <img src={Damaged} alt="Logo" />
                     </div>
-                    <h4 className="text-xl text-gray-600">To be repaired</h4>
+                    <h4 className="text-base text-gray-600">To be repaired</h4>
                 </div>
-                <div className="h-60 w-full  font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border-l-8 border-gray-400 text-gray-900 shadow-lg hover:shadow-xl transition-shadow">
+
+                <div className="h-60 w-full font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border border-gray-400/30 text-gray-900 shadow-lg hover:shadow-xl transition-shadow">
                     <h4 className="text-2xl font-semibold">Decommissioned</h4>
-                    <div className="flex flex-row w-full justify-between">
-                        <p className="text-6xl font-bold text-gray-400">{equipments.filter(el => el.workspace_id === workspace.workspace_id && el.state === "DECOMMISSIONED").length}</p>
+                    <div className="flex flex-row w-full justify-between items-center bg-gray-400/5 p-3 rounded-xl">
+                        <p className="text-6xl font-bold text-gray-400">
+                            {equipments.filter(el => el.workspace_id === workspace.workspace_id && el.state === "DECOMMISSIONED").length}
+                        </p>
                         <img src={Decommissioned} alt="Logo" />
                     </div>
-                    <h4 className="text-xl text-gray-600">Permanently Retired</h4>
+                    <h4 className="text-base text-gray-600">Permanently Retired</h4>
                 </div>
             </div>
             <div className="flex flex-col lg:grid lg:grid-cols-8 items-center justify-center w-full gap-4 h-full">

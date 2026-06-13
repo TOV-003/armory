@@ -150,39 +150,49 @@ export default function Settings({ workspaces, setWorkspaces, equipments, missio
                 <h1 className="text-gray-900 font-normal md:text-2xl md:text-start text-center text-xl">Workspaces:</h1>
                 <div className="flex flex-col items-center md:grid md:grid-cols-2 md:place-items-center md:w-fit md:self-center lg:grid-cols-4 lg:grid lg:place-items-center justify-between w-full gap-4 font-inter">
                     {workspaces.length > 0 ? workspaces.map((el) => (
-                        <div key={el.id} className="h-full w-60 font-k2d font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border-l-8 border-secondary text-gray-900 shadow-lg hover:shadow-xl transition-shadow">
-                            <h4 className="text-xl">{el.name}</h4>
-                            <h4 className="text-lg">Equipments:</h4>
-                            <div className="flex flex-row w-full justify-between">
-                                <p className="text-2xl font-bold">
-                                    {(() => {
-                                        return equipments.filter(eq => eq.workspace_id === el.id).length;
-                                    })()}
-                                </p>
+                        <div key={el.id} className="h-full w-60 font-k2d font-normal flex flex-col justify-evenly items-start p-6 rounded-2xl bg-white border border-secondary/30 text-gray-900 shadow-lg hover:shadow-xl transition-shadow">
+                            <h4 className="text-xl font-semibold text-secondary">{el.name}</h4>
+
+                            <div className="w-full mt-2">
+                                <h4 className="text-sm font-medium text-gray-500 mb-1">Equipments</h4>
+                                <div className="flex flex-row w-full justify-between items-center bg-secondary/5 p-3 rounded-xl">
+                                    <p className="text-2xl font-bold text-secondary">
+                                        {equipments.filter(eq => eq.workspace_id === el.id).length}
+                                    </p>
+                                </div>
                             </div>
-                            <h4 className="text-lg">Missions:</h4>
-                            <div className="flex flex-row w-full justify-between">
-                                <p className="text-2xl font-bold">12</p>
+
+                            <div className="w-full">
+                                <h4 className="text-sm font-medium text-gray-500 mb-1">Missions</h4>
+                                <div className="flex flex-row w-full justify-between items-center bg-secondary/5 p-3 rounded-xl">
+                                    <p className="text-2xl font-bold text-secondary">12</p>
+                                </div>
                             </div>
-                            <p className="text-sm w-full h-full font-k2d">Description: {el.description}</p>
-                            <button
-                                onClick={() => setDeleteWorkspaceModal(true)}
-                                className="bg-red-600/70 self-center backdrop-blur-xl hover:bg-red-600/80 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition duration-200 mt-2"
-                            >
-                                Delete Workspace
-                            </button>
-                            {workspace.workspace_id === el.id ? (
-                                <button className="bg-primary/70 self-center backdrop-blur-xl hover:bg-primary/80 text-alternate text-shadow-alternate px-4 py-2 font-semibold rounded-xl transition duration-200 mt-2">
-                                    Current Workspace
-                                </button>
-                            ) : (
+
+                            <p className="text-sm text-gray-600 w-full mt-2 line-clamp-2">Description: {el.description}</p>
+
+                            <div className="flex flex-col w-full gap-2 mt-3">
                                 <button
-                                    className="bg-green-600/70 self-center backdrop-blur-xl hover:bg-green-600/80 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition duration-200 mt-2"
-                                    onClick={() => handleSelectWorkspace(el.id, el.name)}
+                                    onClick={() => setDeleteWorkspaceModal(true)}
+                                    className="bg-red-500/80 hover:bg-red-600 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition-all duration-200 w-full"
                                 >
-                                    Select Workspace
+                                    Delete Workspace
                                 </button>
-                            )}
+
+                                {workspace.workspace_id === el.id ? (
+                                    <button className="bg-primary/80 text-gray-700 px-4 py-2 font-semibold rounded-xl transition-all duration-200 w-full cursor-default opacity-80">
+                                        Current Workspace
+                                    </button>
+                                ) : (
+                                    <button
+                                        className="bg-green-600/80 hover:bg-green-700 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition-all duration-200 w-full"
+                                        onClick={() => handleSelectWorkspace(el.id, el.name)}
+                                    >
+                                        Select Workspace
+                                    </button>
+                                )}
+                            </div>
+
                             {deleteWorkspaceModal && (
                                 <div
                                     onClick={() => setDeleteWorkspaceModal(false)}
@@ -190,12 +200,12 @@ export default function Settings({ workspaces, setWorkspaces, equipments, missio
                                 >
                                     <div
                                         onClick={(e) => e.stopPropagation()}
-                                        className="flex flex-col text-primary text-center gap-4 max-w-md w-full border border-white/70 bg-blue-200 p-6 rounded-lg"
+                                        className="flex flex-col text-center gap-4 max-w-md w-full bg-white border border-secondary/30 p-6 rounded-2xl shadow-xl"
                                     >
-                                        <p>Are you sure you want to delete this workspace?</p>
+                                        <p className="text-lg font-semibold text-gray-800">Are you sure you want to delete this workspace?</p>
                                         <button
                                             onClick={() => handleDeleteWorkspace(el.id)}
-                                            className="bg-red-600/70 backdrop-blur-xl hover:bg-red-600/80 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition duration-200"
+                                            className="bg-red-500/80 hover:bg-red-600 px-4 py-2 text-white font-semibold rounded-xl cursor-pointer transition-all duration-200"
                                         >
                                             Delete Workspace
                                         </button>
