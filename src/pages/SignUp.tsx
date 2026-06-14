@@ -32,7 +32,8 @@ export default function SignUp() {
         }
         try {
             await signup(formData.email, formData.password, formData.name, formData.phone);
-            toast.success("Check your email for a verification link!");
+            alert("Check your email for a verification link!");
+            toast.success("Successfully signed up!");
         } catch (error) {
             console.error(error);
             toast.error("Failed to sign up.");
