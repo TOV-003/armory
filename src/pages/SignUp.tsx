@@ -32,7 +32,7 @@ export default function SignUp() {
         }
         try {
             await signup(formData.email, formData.password, formData.name, formData.phone);
-            toast.success("Successfully signed up!");
+            toast.success("Check your email for a verification link!");
         } catch (error) {
             console.error(error);
             toast.error("Failed to sign up.");
@@ -79,6 +79,15 @@ export default function SignUp() {
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                             />
                         </div>
+                        <div className="mb-4">
+                            <input
+                                type="text"
+                                placeholder="Phone Number (e.g. +234 9034432212)"
+                                className="w-full p-3 rounded-lg text-gray-900 bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary"
+                                value={formData.phone}
+                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            />
+                        </div>
                         <div>
                             <input
                                 type="password"
@@ -117,5 +126,5 @@ export default function SignUp() {
                 </div>
             </div>
         </div>
-        )
+    )
 }

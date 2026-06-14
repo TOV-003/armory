@@ -56,7 +56,7 @@ export default function Login() {
             <div className="flex justify-end mb-6">
                 <button
                     onClick={() => navigate('/')}
-                    className="text-secondary hover:text-indigo-600 font-semibold flex items-center gap-2"
+                    className="text-secondary hover:text-indigo-600 font-semibold flex items-center gap-2 cursor-pointer"
                 >
                     ← Back to Home
                 </button>
