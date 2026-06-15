@@ -74,6 +74,16 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
         await supabase.auth.signOut();
     }, []);
 
+    const loginWithGoogle = useCallback(async () => {
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: `${window.location.origin}/dashboard`
+            }
+        })
+        if (error) throw error
+    }, [])
+
     const signup = useCallback(async (
         email: string,
         password: string,
@@ -262,7 +272,8 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
         newEquipmentLog,
         updateMissionStatus,
         getEquipmentLogs,
-        updateUser
+        updateUser,
+        loginWithGoogle
     }), [
         user,
         loading,
@@ -284,7 +295,8 @@ export default function AuthContextProvider({ children }: { children: ReactNode 
         newEquipmentLog,
         updateMissionStatus,
         getEquipmentLogs,
-        updateUser
+        updateUser,
+        loginWithGoogle
     ]);
 
     return (

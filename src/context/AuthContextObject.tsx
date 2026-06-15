@@ -65,6 +65,7 @@ interface AuthContextType {
     updateMissionStatus: (missionId: string, newStatus: string) => Promise<boolean>;
     getEquipmentLogs: (equipmentId: string) => Promise<EquipmentLog[]>;
     updateUser: (name: string, phone: string) => Promise<boolean>;
+    loginWithGoogle: () => Promise<void>;
 
 }
 export const AuthContext = createContext<AuthContextType | null>(null);
