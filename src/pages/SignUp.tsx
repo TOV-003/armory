@@ -116,7 +116,7 @@ export default function SignUp() {
                         </button>
                         <button
                             type="button"
-                            className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 font-medium py-3 rounded-lg text-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg border border-gray-300"
+                            className="cursor-pointer w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 font-medium py-3 rounded-lg text-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg border border-gray-300"
                             onClick={loginWithGoogle}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="w-6 h-6">
